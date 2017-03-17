@@ -1,4 +1,4 @@
-## Project Title
+#### Project Title
 	- Bart Timer
 
 #### Team Members
@@ -30,4 +30,3 @@
 #### Other Useful Resources
 	- https://www.getpostman.com/
 	- http://www.utilities-online.info/xmltojson/
-	
