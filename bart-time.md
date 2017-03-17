@@ -21,7 +21,7 @@
         peak hours
 
 #### Sketch of Final Product 
-![alt tag](mokup.png)	
+![alt tag](mockup.png)
 
 #### API to be Used 
 - Bart
