@@ -2,23 +2,24 @@
 - Bart Timer
 
 #### Team Members
-- David
-- Juan
-- Meggin
-- Tae
+- David Rivera
+- Juan C. Reyes
+- Meggin Kearney
+- Tae Lim
 
 #### Project Description
-- Product description:
-    User input:
-        Destination
-        time want to arrive
-    Output
-        bart nearest to user
-        next bart
-        time to leave to arrive on time
-    Extra features (time allowing)
-        buffer based on external factors. time to exit home
-        peak hours
+- User Input:
+    - Origin/Destiation Station Names
+    - Departure Time Window
+    - DoW (Day of Week)
+    - Estimated walking time to origin station
+- Output
+    - Next train arrival times (up to 3 trains total)
+    - Time to leave to arrive on time
+- Extra features (time allowing)
+	- Walk or Drive as default setting
+	- If driving is selected, live traffic time to the origin station from Google Maps API
+	- (One major caveat for driving is that the traffic time buffer does not factor in the travelling time incurred getting to/from the user's car)
 
 #### Sketch of Final Product 
 ![alt tag](mockup.png)
