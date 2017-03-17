@@ -17,7 +17,7 @@
     - Next train arrival times (up to 3 trains total)
     - Time to leave to arrive on time
 - Extra features (time allowing)
-	- Walk or Drive as default setting
+	- Walk or Drive as a default setting
 	- If driving is selected, live traffic time to the origin station from Google Maps API
 	- (One major caveat for driving is that the traffic time buffer does not factor in the travelling time incurred getting to/from the user's car)
 
