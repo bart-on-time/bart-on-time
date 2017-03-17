@@ -8,8 +8,17 @@
 	- Tae
 
 #### Project Description
-	- 
-	-  
+- Product description:
+    User input:
+        Destination
+        time want to arrive
+    Output
+        bart nearest to user
+        next bart
+        time to leave to arrive on time
+    Extra features (time allowing)
+        buffer based on external factors. time to exit home
+        peak hours
 
 #### Sketch of Final Product 
 	- 
