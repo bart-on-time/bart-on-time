@@ -2,10 +2,10 @@
 	- Bart Timer
 
 #### Team Members
-	- David
-	- Juan
-	- Meggin
-	- Tae
+- David: Front End
+- Juan: Firebase backend
+- Meggin: Firebase backend
+- Tae: bart api
 
 #### Project Description
 - Product description:
@@ -19,6 +19,7 @@
     Extra features (time allowing)
         buffer based on external factors. time to exit home
         peak hours
+
 
 #### Sketch of Final Product 
 	- 
