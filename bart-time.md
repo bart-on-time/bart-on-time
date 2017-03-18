@@ -2,10 +2,11 @@
 - Bart Timer
 
 #### Team Members
-- David Rivera
-- Juan C. Reyes
-- Meggin Kearney
-- Tae Lim
+- David: Front End
+- Juan: Firebase backend
+- Meggin: Firebase backend
+- Tae: bart api
+
 
 #### Project Description
 - User Input:
@@ -20,6 +21,7 @@
 	- Walk or Drive as a default setting
 	- If driving is selected, live traffic time to the origin station from Google Maps API
 	- (One major caveat for driving is that the traffic time buffer does not factor in the travelling time incurred getting to/from the user's car)
+
 
 #### Sketch of Final Product 
 ![alt tag](mockup.png)
