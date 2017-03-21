@@ -10,7 +10,7 @@
 
 #### Project Description
 - User Input:
-    - Origin/Destiation Station Names
+    - Origin/Destination Station Names
     - Departure Time Window
     - DoW (Day of Week)
     - Estimated walking time to origin station
@@ -38,6 +38,15 @@
 - Load BART API data based on user input 
 - Display on the generated URL
 - Parse XML to JSON
+
+#### Project presentation requirements
+
+- Overall application's concepts
+- Motivation for its development
+- Our design process
+- Technologies used and briefly how they work
+- Demonstration of project functionality
+- Directions for future development
 
 #### Other Useful Resources
 - https://www.getpostman.com/
