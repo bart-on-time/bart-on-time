@@ -5,10 +5,9 @@ The basic gist is that we want to read in the user's location using geolocation.
 And we want to read in the the user's desired BART station.
 
 Using both the origin and destination, we will calculate commute time using specifically the
-[Google Maps Distance Matrix API](https://developers.google.com/maps/documentation/javascript/distancematrix).
+[Google Maps Directions Service](https://developers.google.com/maps/documentation/javascript/directions).
 
-This API returns distance and time from an origin to a destination based,
-and defaults to current time for estimations.
+We want to pay specific attention to the Driving Options attribute.
 
 We will populate the 'AVG walking time to station' and the 'Current traffic to station'
 based on calling this API for both walking and driving travel modes.
@@ -30,14 +29,14 @@ We may want to store the lat/long location of each BART station in Firebase.
 ### View
 
 The user selected whether they are walking or driving.
-This will determine the default value returned by Distance Matrix
+This will determine the default value returned by Directions Service
 to be used in calculation of when the user should leave.
 
 But we also will report both the avg walking time,
 and the current traffic time, in the UI, so both walking and driving travel options need to be called.
 
 One suggestion to remove in our designs the user input of walking time.
-It might be nice to just use the Distance Matrix API for both walking and driving options.
+It might be nice to just use the Driving Service for both walking and driving options.
 But good to have that placeholder for now, in case something goes wrong with API.
 
 ### Controller
