@@ -48,6 +48,13 @@
 - Demonstration of project functionality
 - Directions for future development
 
+#### Remember these!
+
+- Functional - the app should work.
+- Reliable - app should work on different devices, and maybe even basic offline usage.
+- Usable - it should be obvious and easy to use.
+- Emotional Design - actually thinking the emotional part could be future implementation?
+
 #### Other Useful Resources
 - https://www.getpostman.com/
 - http://www.utilities-online.info/xmltojson/
