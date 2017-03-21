@@ -56,4 +56,8 @@ We need functions to figure out:
 
 3. Another future idea would be for a user to select travel times based on different departure times than just now. In other words, the night before I'm catching Bart, I can enter in a desired leave time for the morning, and that will give me estimates on drive times. I can select different desired leave times to get different train times.
 
+4. Uh-oh. It may not be possible to estimate driving based on traffic times. Need to be a premium client? I might be able to get premium client status with Google account, but not too sure if this is OK. From the docs:
+
+duration_in_traffic indicates the total duration of this leg, taking into account current traffic conditions. The duration_in_traffic is returned only if all of the following are true: The request includes a valid Google Maps APIs Premium Plan client ID. [Lots more after this, just copying in what is most relevant].
+
 
