@@ -4,7 +4,7 @@
 #### Team Members
 - David: Front End
 - Juan: Firebase backend
-- Meggin: Firebase backend
+- Meggin: Maps API and backend
 - Tae: bart api
 
 
