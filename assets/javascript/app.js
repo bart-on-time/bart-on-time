@@ -9,6 +9,7 @@ data to store:
 
 */
 
+
 // Initialize Firebase
 var config = {
 	apiKey: "AIzaSyBS6nowOI7CgfhnS-hM3A5BUxh58k7NdVo",
@@ -21,13 +22,20 @@ firebase.initializeApp(config);
 var database = firebase.database();
 
 
-//// phase I: new trip ////
-$("#saveBtn").on("click", function() {
-	// take user to data entry section
-});
-/////////////////////////////////
+//// vars ////
+var phase1 = $("#phase1");
+var phase2 = $("#phase2");
+var phase3a = $("#phase3a");
+var phase3b = $("#phase3b");
 
-//// phase II: save button; stores user inputs in firebase////
+var tripName;
+var origin;
+var destination;
+var departStart;
+var departEnd;
+var travelMode;
+
+//// phase 1: save button; stores user inputs in firebase////
 function showSection(section) {
 	phase1.css({'display': 'none'});
 	phase2.css({'display': 'none'});
@@ -38,13 +46,23 @@ function showSection(section) {
 		section.css({'display' : 'block'})
 	}
 }
+/////////////////////////////////
 
-$("#saveBtn").on("click", function(event) {
+//// phase 2: new trip ////
+$("#new").on("click", function() {
+	showSection(phase2);
+});
+/////////////////////////////////
+
+//// phase 3: new trip ////
+$("#save").on("click", function(event) {
 	event.preventDefault();
 
 	// Grabbed values from text boxes
 	tripName = $("#tripName-input").val().trim();
+	console.log(tripName);
 	origin = $(".origin-selection").val().trim();
+	console.log(origin);
 	destination = $(".destination-selection").val().trim();
 	departStart = $("#departStart-input").val().trim();
 	departEnd = $("#departEnd-input").val().trim();
@@ -54,31 +72,22 @@ $("#saveBtn").on("click", function(event) {
 	// save to firebase
 	database.ref().push({
 		tripName: tripName,
-		Origin: Origin,
+		origin: origin,
 		destination: destination,
 		departStart: departStart,
 		departEnd: departEnd,
 		travelMode: travelMode
 	});
-
-	// move to new section
-	showSection()
-
-
 });
 /////////////////////////////////
 
 
-// will append trip list
-//   // full list of items to the well
-//   $("#full-member-list").append("<div class='well'><span id='name'> " + childSnapshot.val().name +
-//     " </span><span id='email'> " + childSnapshot.val().email +
-//     " </span><span id='age'> " + childSnapshot.val().age +
-//     " </span><span id='comment'> " + childSnapshot.val().comment + " </span></div>");
-// // Handle the errors
-// }, function(errorObject) {
-//   console.log("Errors handled: " + errorObject.code);
-// });
+// add list of trips to phase I 
+database.ref().on("child_added", function(childSnapshot) {
+// Change the HTML to reflect
+	console.log("child: " + childSnapshot.val().tripName );
+	$("#phase1").append(childSnapshot.val().tripName);
+});
 // /////////////////////////////////
 
 //// will be loaded on page load ////
