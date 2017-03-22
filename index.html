@@ -8,8 +8,9 @@
     <title>Bart On-Time</title>
     <!-- Linking CSS -->
     <link rel="stylesheet" type="text/css" href="assets/css/style.css">
-    <!-- Linking Custom Harry Potter Font -->
-    <link rel="stylesheet" href="assets/font/stylesheet.css" type="text/css"/> 
+
+    <script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
+
   </head>
   <body>
 
@@ -39,16 +40,16 @@
           <option class="destination-selection" value="37.77989899999997,-122.41356300000007">Civic Center Station</option>
         </select>
         <div class="depart-start-time">
-          <label for="departStart-input">First Train Time (HH:mm - military time)</label>
+          <label for="departStart-input">Earliest depart Time (HH:mm - military time)</label>
           <input class="depart-start-time" id="departStart-input" type="time" required>
         </div>
         <div class="depart-end-time">
-          <label for="departEnd-input">First Train Time (HH:mm - military time)</label>
+          <label for="departEnd-input">Latest depart Time (HH:mm - military time)</label>
           <input class="depart-end-time" id="departEnd-input" type="time" required>
         </div>
         <select id="mode">
-          <option class=".travelMode-selection" value="DRIVING">Drive</option>
-          <option class=".travelMode-selection" value="WALKING">Walk</option>
+          <option class="travelMode-selection" value="DRIVING">Drive</option>
+          <option class="travelMode-selection" value="WALKING">Walk</option>
         </select>
         <button id="save">Save</button>
         <button id="cancel">Cancel</button>
