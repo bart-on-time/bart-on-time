@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Favorite Movies</title>
+  <style type="text/css">
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <div id="demo"></div>
+
+    <script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+    <script type="text/javascript">
+      // BART API Key (taehyun.lim@gmail.com): ZPZZ-PTE2-9NWT-DWE9
+      
+      var xmlObj = {
+        uri: null,
+        date: null,
+        time: null,
+        station: {
+          name: null,
+          abbr: null,
+          etd: []
+        }
+      }
+
+      // Declare a global variable to store XML doc from the ajax function
+      var doc;
+
+      $.ajax({
+        type: "GET",
+        url: "http://api.bart.gov/api/etd.aspx?cmd=etd&orig=ASHB&key=ZPZZ-PTE2-9NWT-DWE9",
+        dataType: "text"
+        //async: false,
+        //contentType: "text/xml; charset=\"utf-8\""
+      }).done(function(response) {
+        // For debugging API call
+        console.log(response);
+        // Use .parseXML() functino (core jQuery)
+        var xmlRaw = $.parseXML(response)
+        // This is the entire XML doc needed
+        var xml = xmlRaw.childNodes[0]
+
+        // Saving the XML doc in the global variable as $doc (outside of ajax call)
+        doc = xml;
+
+        // Mapping all 
+        xmlObj.uri = xml.children[0].innerHTML;
+        xmlObj.date = xml.children[1].innerHTML;
+        xmlObj.time = xml.children[2].innerHTML;
+        xmlObj.station.name = xml.children[3].children[0].innerHTML;
+        xmlObj.station.abbr = xml.children[3].children[1].innerHTML;
+
+
+        var name = xml.children[3].children[0].innerHTML;
+        var name2 = xml.getElementsByTagName("name")[0].innerHTML;
+
+        var etdRaw = xml.getElementsByTagName("etd");
+        for (var i = 0; i < etdRaw.length; i++) {
+          var etdChild = {
+            destination: null,
+            abbreviation: null,
+            limited: null,
+            estimate: []
+          };
+
+          console.log(etdRaw[i]);
+          console.log(etdRaw[i].getElementsByTagName("destination")[0].innerHTML);
+          etdChild.destination = etdRaw[i].getElementsByTagName("destination")[0].innerHTML;
+          etdChild.abbreviation = etdRaw[i].getElementsByTagName("abbreviation")[0].innerHTML;
+          etdChild.limited = etdRaw[i].getElementsByTagName("limited")[0].innerHTML;
+          //etdChild.estimate = etdRaw[i].getElementsByTagName("estimate");
+          var estimateRaw = etdRaw[i].getElementsByTagName("estimate");
+          for (var j = 0; j < estimateRaw.length; j++) {
+            var estimateChild = {
+              minutes: null,
+              platform: null,
+              direction: null,
+              trainLength: null,
+              hexcolor: null
+            };
+            estimateChild.minutes = estimateRaw[j].getElementsByTagName("minutes")[0].innerHTML;
+            estimateChild.platform = estimateRaw[j].getElementsByTagName("platform")[0].innerHTML;
+            estimateChild.direction = estimateRaw[j].getElementsByTagName("direction")[0].innerHTML;
+            estimateChild.trainLength = estimateRaw[j].getElementsByTagName("length")[0].innerHTML;
+            estimateChild.hexcolor = estimateRaw[j].getElementsByTagName("hexcolor")[0].innerHTML;
+            etdChild.estimate.push(estimateChild);
+          }
+
+          xmlObj.station.etd.push(etdChild);
+        }
+
+
+        //console.log($xml);
+        //console.log(.children[0]);
+        //console.log(xml);
+        console.log(xml);
+        console.log(name);
+        console.log(name2);
+        console.log(xmlObj);
+        //console.log(estimateRaw);
+
+        //console.log(doc.station.name);
+      });
+
+
+
+
+      // var parser, xmlDoc;
+
+      // var response = $.get('http://api.bart.gov/api/etd.aspx?cmd=etd&orig=RICH&key=MW9S-E7SL-26DU-VV8V');
+      // var text = response.responseText;
+
+
+      // var text = "<bookstore><book>" +
+      // "<title>Everyday Italian</title>" +
+      // "<author>Giada De Laurentiis</author>" +
+      // "<year>2005</year>" +
+      // "</book></bookstore>";
+
+      // parser = new DOMParser();
+      // xmlDoc = parser.parseFromString(text,"text/xml");
+      // console.log(xmlDoc);
+      // document.getElementById("demo").innerHTML =
+      // xmlDoc.getElementsByTagName("minutes")[0].childNodes[0].nodeValue;
+
+    </script>
+  </div>
+</body>
+
+</html>
