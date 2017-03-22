@@ -86,10 +86,18 @@ $("#save").on("click", function(event) {
 
 // Fires when trip selected.
 function addTripClickListener() {
-	$(".clickable-row").click(function() {
-        console.log("You clicked on this row!");
+	$(".clickable-row").on("click", function() {
+        var tripId = $(this).children('.trip-id').text();
+        console.log("You clicked on this trip: " + tripId);
+        showSection(phase3a);
     });
 };
+
+function addSaveTripListener() {
+	$("#save").click(function() {
+        showSection(phase3a);
+    });
+}
 
 // add list of trips to phase I 
 database.ref().on("child_added", function(snapshot) {
@@ -111,6 +119,9 @@ database.ref().on("child_added", function(snapshot) {
 //// will be loaded on page load ////
 $(document).ready(function() {
 	showSection(phase1);
+
+	// Listens for trip click event.
+	addTripClickListener();
 });
 /////////////////////////////////
 
