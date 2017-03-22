@@ -4,13 +4,13 @@
 #### Team Members
 - David: Front End
 - Juan: Firebase backend
-- Meggin: Firebase backend
+- Meggin: Maps API and backend
 - Tae: bart api
 
 
 #### Project Description
 - User Input:
-    - Origin/Destiation Station Names
+    - Origin/Destination Station Names
     - Departure Time Window
     - DoW (Day of Week)
     - Estimated walking time to origin station
@@ -38,6 +38,22 @@
 - Load BART API data based on user input 
 - Display on the generated URL
 - Parse XML to JSON
+
+#### Project presentation requirements
+
+- Overall application's concepts
+- Motivation for its development
+- Our design process
+- Technologies used and briefly how they work
+- Demonstration of project functionality
+- Directions for future development
+
+#### Remember these!
+
+- Functional - the app should work.
+- Reliable - app should work on different devices, and maybe even basic offline usage.
+- Usable - it should be obvious and easy to use.
+- Emotional Design - actually thinking the emotional part could be future implementation?
 
 #### Other Useful Resources
 - https://www.getpostman.com/
