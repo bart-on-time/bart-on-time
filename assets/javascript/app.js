@@ -18,6 +18,7 @@ var config = {
 	storageBucket: "test-d1af2.appspot.com",
 	messagingSenderId: "395340255814"
 };
+
 firebase.initializeApp(config);
 var database = firebase.database();
 
@@ -86,7 +87,7 @@ $("#save").on("click", function(event) {
 database.ref().on("child_added", function(childSnapshot) {
 // Change the HTML to reflect
 	console.log("child: " + childSnapshot.val().tripName );
-	$("#phase1").append(childSnapshot.val().tripName);
+	$("#trips").append(childSnapshot.val().tripName);
 });
 // /////////////////////////////////
 
