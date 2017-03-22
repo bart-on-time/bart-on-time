@@ -46,7 +46,7 @@
 - Our design process
 - Technologies used and briefly how they work
 - Demonstration of project functionality
-- Directions for future development
+- Directions for future development, e.g. offline support, page to view directions
 
 #### Remember these!
 
