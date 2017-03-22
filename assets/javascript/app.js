@@ -12,11 +12,11 @@ data to store:
 
 // Initialize Firebase
 var config = {
-	apiKey: "AIzaSyBS6nowOI7CgfhnS-hM3A5BUxh58k7NdVo",
-	authDomain: "test-d1af2.firebaseapp.com",
-	databaseURL: "https://test-d1af2.firebaseio.com",
-	storageBucket: "test-d1af2.appspot.com",
-	messagingSenderId: "395340255814"
+	apiKey: "AIzaSyCNU5CN43KJZiTfFgMCIpWPMLBIiVUQ8Fo",
+	authDomain: "bart-on-time.firebaseapp.com",
+	databaseURL: "https://bart-on-time.firebaseio.com",
+	storageBucket: "bart-on-time.appspot.com",
+	messagingSenderId: "258285045447"
 };
 
 firebase.initializeApp(config);
@@ -62,7 +62,8 @@ $("#save").on("click", function(event) {
 	// Grabbed values from text boxes
 	tripName = $("#tripName-input").val().trim();
 	console.log(tripName);
-	origin = $(".origin-selection").val().trim();
+	originCoordinates = $(".origin-selection").val().trim();
+	originName = $(".origin-selection").html().trim();
 	console.log(origin);
 	destination = $(".destination-selection").val().trim();
 	departStart = $("#departStart-input").val().trim();
@@ -73,7 +74,8 @@ $("#save").on("click", function(event) {
 	// save to firebase
 	database.ref().push({
 		tripName: tripName,
-		origin: origin,
+		originCoordinates: originCoordinates,
+		originName: originName,
 		destination: destination,
 		departStart: departStart,
 		departEnd: departEnd,
@@ -84,16 +86,25 @@ $("#save").on("click", function(event) {
 
 
 // add list of trips to phase I 
-database.ref().on("child_added", function(childSnapshot) {
+database.ref().on("child_added", function(snapshot) {
 // Change the HTML to reflect
-	console.log("child: " + childSnapshot.val().tripName );
-	$("#trips").append(childSnapshot.val().tripName);
+	console.log("child: " + snapshot.val().tripName );
+	// Build up train table in DOM.
+	$("#trips").append("<tr class='clickable-row'>" +
+						  "<th class='trip-id'>" + snapshot.getKey() + "</th>" +
+	                      "<th>" + snapshot.val().tripName + "</th>" +
+	                      "<th>" + snapshot.val().originName + "</th>" +
+	                      "<th>" + "7" + "</th>" +
+	                    "</tr>");
 });
 // /////////////////////////////////
 
 //// will be loaded on page load ////
 $(document).ready(function() {
 	showSection(phase1);
+    $(".clickable-row").click(function() {
+        console.log("You clicked on this row!");
+    });
 });
 /////////////////////////////////
 
