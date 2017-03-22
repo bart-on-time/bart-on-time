@@ -3,14 +3,8 @@
   box-sizing: border-box;
 }
 
-.jumbotron {
-	background-color: green;
-	color: white;
-}
-
-.panel-default>.panel-heading {
-	background-color: orange;
-	color: white;
+.clickable-row:hover {
+	background-color: red;
 }
 
 .btn {
