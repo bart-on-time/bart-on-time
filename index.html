@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <!-- Document responsive across devices. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Document's character set. -->
+    <meta charset="UTF-8">
+    <title>Bart On-Time</title>
+    <!-- Linking CSS -->
+    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+    <!-- Linking Custom Harry Potter Font -->
+    <link rel="stylesheet" href="assets/font/stylesheet.css" type="text/css"/> 
+  </head>
+  <body>
+
+    <div class="header-container">
+      <header>Bart On-Time!</header>
+    </div>
+
+    <div class="main-container">
+      <section id="phase1">
+        <button id="new">New</button>
+      </section>
+      <section id="phase2">
+        <div class="trip-input">
+          <label for="trip-name">Trip Name</label>
+          <input class="tripName-input" id="tripName-input" type="text">
+        </div>
+        <select id="origin-station">
+          <option class="origin-selection" value="37.79326600000003,-122.39659">Embarcadero Station</option>
+          <option class="origin-selection" value="37.789641000000024,-122.40095599999995">Montgomery Station</option>
+          <option class="origin-selection" value="37.784507,-122.40772099999998">Powell Station</option>
+          <option class="origin-selection" value="37.77989899999997,-122.41356300000007">Civic Center Station</option>
+        </select>
+        <select id="destination-station">
+          <option class="destination-selection" value="37.79326600000003,-122.39659">Embarcadero Station</option>
+          <option class="destination-selection" value="37.789641000000024,-122.40095599999995">Montgomery Station</option>
+          <option class="destination-selection" value="37.784507,-122.40772099999998">Powell Station</option>
+          <option class="destination-selection" value="37.77989899999997,-122.41356300000007">Civic Center Station</option>
+        </select>
+        <div class="depart-start-time">
+          <label for="departStart-input">First Train Time (HH:mm - military time)</label>
+          <input class="depart-start-time" id="departStart-input" type="time" required>
+        </div>
+        <div class="depart-end-time">
+          <label for="departEnd-input">First Train Time (HH:mm - military time)</label>
+          <input class="depart-end-time" id="departEnd-input" type="time" required>
+        </div>
+        <select id="mode">
+          <option class=".travelMode-selection" value="DRIVING">Drive</option>
+          <option class=".travelMode-selection" value="WALKING">Walk</option>
+        </select>
+        <button id="save">Save</button>
+        <button id="cancel">Cancel</button>
+      </section>
+      <section id="phase3a">
+        <button class="edit">Edit</button>
+        <button class="listView">View Trips</button>
+      </section>
+      <section id="phase3b">
+        <button class="edit">Edit</button>
+        <button class="listView">View Trips</button>
+      </section>
+    </div>
+    
+    <!-- Linking to jQuery -->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+
+    <!-- Linking JavaScript-->
+    <script type="text/javascript" src="assets/javascript/app.js"></script>    
+  </body>
+</html>
