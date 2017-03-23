@@ -49,7 +49,7 @@ function showSection(section) {
 	phase3b.css({'display': 'none'});
 
 	if (section) {
-		section.css({'display' : 'block'})
+		section.css({'display' : 'block'});
 	}
 }
 /////////////////////////////////
@@ -68,7 +68,10 @@ function addTripClickListener() {
         var tripId = $(this).children('.trip-id').text();
         console.log("You clicked on this trip: " + tripId);
         showSection(phase3a);
-        //getUserLocation();
+        $(".walking-distance").empty();
+		$(".walking-estimate").empty();
+		$(".driving-distance").empty();
+		$(".driving-estimate").empty();
 
         // show relevant data related to clicked trip. displayed in phase 3
         database.ref("" + tripId + "").on("value", function(snapshot) { 
@@ -78,9 +81,9 @@ function addTripClickListener() {
         	$(".trip-name").text(snapshot.val().tripName);
         	$(".selected-origin-station").text(snapshot.val().originName + " ");
         	$(".selected-destination-station").text(snapshot.val().destinationName + " ");
-        	// ...
         });
 
+        getUserLocation();
     });
 };
 
@@ -159,6 +162,10 @@ function addSaveTripClickListener() {
 
 		// navigate to phase 3 //
 		showSection(phase3a);
+		$(".walking-distance").empty();
+		$(".walking-estimate").empty();
+		$(".driving-distance").empty();
+		$(".driving-estimate").empty();
 
 		getUserLocation();
 	});
@@ -229,6 +236,7 @@ $(".listView").on("click", function() {
 
 function initMap() {
 	addSaveTripClickListener();
+	addTripClickListener();
 }
 
 function getUserLocation() {
@@ -258,11 +266,11 @@ function getUserLocation() {
 }
 
 function calculateRoute(directionsService, userOrigin) {
-	console.log("Origin Coordinates being used in calculating route are : " + originCoordinates);
+	console.log("Origin Coordinates being used in calculating route are : " + this.originCoordinates);
 	directionsService.route({
 		origin: userOrigin,
-		destination: originCoordinates,
-		travelMode: travelMode,
+		destination: this.originCoordinates,
+		travelMode: this.travelMode,
 	}, function(response, status) {
 		if (status === 'OK') {
 			var route = response.routes[0];
@@ -281,11 +289,11 @@ function calculateRoute(directionsService, userOrigin) {
 }
 
 function calculateAlternativeRoute(directionsService, userOrigin, alternativeTravelMode) {
-	console.log("Origin Coordinates being used in calculating route are : " + originCoordinates);
+	console.log("Origin Coordinates being used in calculating route are : " + this.originCoordinates);
 	console.log("Alternative travel mode available for alternative calculations : " + alternativeTravelMode);
 	directionsService.route({
 		origin: userOrigin,
-		destination: originCoordinates,
+		destination: this.originCoordinates,
 		travelMode: alternativeTravelMode,
 	}, function(response, status) {
 		if (status === 'OK') {
