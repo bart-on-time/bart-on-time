@@ -35,6 +35,7 @@ var originCoordinates;
 var departStart;
 var departEnd;
 var travelMode;
+var alternativeTravelMode;
 // when user clicks edit
 var editUniqueId;
 var editStauts = false;
@@ -187,6 +188,7 @@ database.ref().orderByChild("dateAdded").limitToLast(1).on("child_added", functi
 	console.log("These are origin coordinates accessible to view page: " + originCoordinates);
 	travelMode = snapshot.val().travelMode;
 	console.log("This is travel mode accessible to view page: " + travelMode);
+	console.log("This is the alternative travel mode accessible to view page: " + alternativeTravelMode);
 	console.log("editUniqueId " + editUniqueId);
 	$(".trip-name").text(snapshot.val().tripName);
 	$(".selected-origin-station").text(snapshot.val().originName);
@@ -254,12 +256,18 @@ function calculateRoute(directionsService, userOrigin) {
 	directionsService.route({
 		origin: userOrigin,
 		destination: originCoordinates,
-		travelMode: travelMode
+		travelMode: travelMode,
 	}, function(response, status) {
 		if (status === 'OK') {
 			var route = response.routes[0];
-			$(".walking-distance").html(route.legs[0].distance.text + "/ ");
-			$(".walking-estimate").html(route.legs[0].duration.text);
+			if (travelMode === "WALKING") {
+				$(".walking-distance").html(route.legs[0].distance.text + "/ ");
+				$(".walking-estimate").html(route.legs[0].duration.text);
+			} else if (travelMode === "DRIVING") {
+				$(".driving-distance").html(route.legs[0].distance.text + "/ ");
+				$(".driving-estimate").html(route.legs[0].duration.text);
+			}
+			
   		} else {
     		window.alert('Directions request failed due to ' + status);
   		}
