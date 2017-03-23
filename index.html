@@ -5,25 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Document's character set. -->
     <meta charset="UTF-8">
-    <title>Bart On-Time</title>
+
+    <title>BART ON TIME</title>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+
+    <!-- Bootstrap CDN-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
     <!-- Linking CSS -->
     <link rel="stylesheet" type="text/css" href="assets/css/style.css">
-    <!-- Linking Custom Harry Potter Font -->
-    <link rel="stylesheet" href="assets/font/stylesheet.css" type="text/css"/> 
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/3.7.3/firebase.js"></script>
+
   </head>
   <body>
 
     <div class="header-container">
-      <header>Bart On-Time!</header>
+      <header>BART ON TIME</header>
     </div>
 
     <div class="main-container">
       <section id="phase1">
-        <button id="new">New</button>
+        <div class="panel-body">
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr class="table-head">
+                  <th class='trip-id'>Trip Key</th>
+                  <th>Trip Name</th>
+                  <th>Next Train To:</th>
+                  <th>Arrives At:</th>
+                </tr>
+              </thead>
+              <tbody id="trips">
+                  <!-- List of stored trips here. -->
+              </tbody>
+            </table>
+          </div>
+          </div>
+        <button class="btn btn-primary" id="new">New</button>
       </section>
       <section id="phase2">
         <div class="trip-input">
-          <label for="trip-name">Trip Name</label>
+          <label for="tripName-input" class="travel2">Trip Name:</label>
           <input class="tripName-input" id="tripName-input" type="text">
         </div>
         <select id="origin-station">
@@ -39,34 +68,57 @@
           <option class="destination-selection" value="37.77989899999997,-122.41356300000007">Civic Center Station</option>
         </select>
         <div class="depart-start-time">
-          <label for="departStart-input">First Train Time (HH:mm - military time)</label>
+          <label for="departStart-input">Between</label>
           <input class="depart-start-time" id="departStart-input" type="time" required>
         </div>
         <div class="depart-end-time">
-          <label for="departEnd-input">First Train Time (HH:mm - military time)</label>
+          <label for="departEnd-input">And</label>
           <input class="depart-end-time" id="departEnd-input" type="time" required>
         </div>
-        <select id="mode">
-          <option class=".travelMode-selection" value="DRIVING">Drive</option>
-          <option class=".travelMode-selection" value="WALKING">Walk</option>
-        </select>
-        <button id="save">Save</button>
-        <button id="cancel">Cancel</button>
+        <div class="travel"><strong>Travel to Station by (default):</strong>
+          <br>
+          <label class="radio-inline">
+            <input type="radio" class="travelMode-selection" name="inlineRadioOptions" id="inlineRadio1" value="DRIVING"> Walking
+          </label>
+          <label class="radio-inline">
+            <input type="radio" class="travelMode-selection" name="inlineRadioOptions" id="inlineRadio2" value="WALKING">Driving
+          </label>
+        </div>
+        <button class="btn btn-primary" id="save">Save</button>
+        <button class="btn btn-danger" id="cancel">Cancel</button>
       </section>
       <section id="phase3a">
-        <button class="edit">Edit</button>
-        <button class="listView">View Trips</button>
+        <div class="view-trip">Now on <span class="trip-name"></span></div>
+        <div class="simple">Start Your Trip (<span class="travel-mode">WALKING</span>) In:</div>
+        <div class="leave-time-min">12 MINUTES</div>
+        <div>Your Next Train To <span class="selected-origin-station"></span></div>
+        <div>Will Arrive In: <span class="arrival-time-min">19 MIN</span></div>
+        <div>Arrive at Destination: <span class="selected-destination-station"></span><span class="destination-arrival-time-1">5:29 PM</span></div>
+        <div>AVG DIST/WALKING TIME TO STATION: <span class="walking-distance"></span><span class="walking-estimate"></span></div>
+        <div>AVG DIST/DRIVING TIME TO STATION: <span class="driving-distance"></span><span class="driving-estimate"></span></div>
+        <div>2nd Train Arrives In: <span class="two-train-arrival-time-min">19 MIN</span></div>
+        <div>Arrive at Destination: <span class="selected-destination-station"></span><span class="destination-arrival-time-1">5:49 PM</span></div>
+        <div>3rd Train Arrives In: <span class="three-train-arrival-time-min">19 MIN</span></div>
+        <div>Arrive at Destination: <span class="selected-destination-station"></span><span class="destination-arrival-time-1">7:09 PM</span></div>
+        <button class="edit btn btn-primary">Edit</button>
+        <button class="listView btn btn-primary">View Trips</button>
       </section>
       <section id="phase3b">
-        <button class="edit">Edit</button>
-        <button class="listView">View Trips</button>
+        <!-- will show selected trip or saved trip with edit or view trip options -->
+        <button class="edit btn btn-primary">Edit</button>
+        <button class="listView btn btn-primary">View Trips</button>
       </section>
     </div>
     
     <!-- Linking to jQuery -->
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
 
+    <!-- Linking to Maps API -->
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCxGBXR2leJ50yBCVWRoEjGPTnSMi8bZLE&callback=initMap">
+    </script>
+
     <!-- Linking JavaScript-->
-    <script type="text/javascript" src="assets/javascript/app.js"></script>    
+    <script type="text/javascript" src="assets/javascript/app.js"></script> 
   </body>
 </html>
