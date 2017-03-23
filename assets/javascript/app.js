@@ -31,6 +31,7 @@ var phase3b = $("#phase3b");
 var tripName;
 var origin;
 var destination;
+var originCoordinates;
 var departStart;
 var departEnd;
 var travelMode;
@@ -58,7 +59,6 @@ $(document).ready(function() {
 	showSection(phase1);
 	// Listens for trip click event.
 	addTripClickListener();
-	//addSaveTripListener();
 });
 
 // Fires when trip selected.
@@ -67,6 +67,7 @@ function addTripClickListener() {
         var tripId = $(this).children('.trip-id').text();
         console.log("You clicked on this trip: " + tripId);
         showSection(phase3a);
+        //getUserLocation();
 
         // show relevant data related to clicked trip. displayed in phase 3
         database.ref("" + tripId + "").on("value", function(snapshot) { 
@@ -74,7 +75,8 @@ function addTripClickListener() {
         	console.log(snapshot.val().tripName);
         	// the below code will return anything saved in firebase to phase 3
         	$(".trip-name").text(snapshot.val().tripName);
-        	$(".selected-origin-station").text(snapshot.val().originName);
+        	$(".selected-origin-station").text(snapshot.val().originName + " ");
+        	$(".selected-destination-station").text(snapshot.val().destinationName + " ");
         	// ...
         });
 
@@ -84,76 +86,82 @@ function addTripClickListener() {
 // new trip move to phase 2
 $("#new").on("click", function() {
 	showSection(phase2);
+	addSaveTripClickListener();
 });
 
 /////////////////////////////////
 
 //// phase 2: save button; stores user inputs in firebase ////
-$("#save").on("click", function(event) {
-	event.preventDefault();
+/// storing in function, as need to call listener to initialize maps.
+function addSaveTripClickListener() {
+	$("#save").on("click", function(event) {
+		event.preventDefault();
 
-	// Grabbed values from text boxes //
-	tripName = $("#tripName-input").val().trim();
-	console.log(tripName);
-	originCoordinates = $("#origin-station option:selected").val().trim();
-	originName = $("#origin-station option:selected").html().trim();
-	console.log(originName);
-	destinationCoordinates = $("#destination-station option:selected").val().trim();
-	destinationName = $("#destination-station option:selected").html().trim();
+		// Grabbed values from text boxes //
+		tripName = $("#tripName-input").val().trim();
+		console.log(tripName);
+		originCoordinates = $("#origin-station option:selected").val().trim();
+		originName = $("#origin-station option:selected").html().trim();
+		console.log(originName);
+		destinationCoordinates = $("#destination-station option:selected").val().trim();
+		destinationName = $("#destination-station option:selected").html().trim();
 
-	departStart = $("#departStart-input").val().trim();
-	departEnd = $("#departEnd-input").val().trim();
-	travelMode = $(".travelMode-selection").val().trim();
-	//dayOfWeek = $("#myselect").val();
+		departStart = $("#departStart-input").val().trim();
+		departEnd = $("#departEnd-input").val().trim();
+		travelMode = $(".travelMode-selection").val().trim();
+		//dayOfWeek = $("#myselect").val();
 
-	// save to firebase //
-	if (editStauts) { // edited record
-		console.log("editUniqueId** " + editUniqueId);
-		// removes existing id and creates new one. technique 1
-		//database.ref().child(editUniqueId).remove();
+		// save to firebase //
+		if (editStauts) { // edited record
+			console.log("editUniqueId** " + editUniqueId);
+			// removes existing id and creates new one. technique 1
+			//database.ref().child(editUniqueId).remove();
 
-		// technique 2 prefered
-		// Update some of the keys for a defined path without replacing all of the data
-		//database.ref("-KfuTowI1RAjwSmgOBtz").update({ tripName: 'yo'});
+			// technique 2 prefered
+			// Update some of the keys for a defined path without replacing all of the data
+			//database.ref("-KfuTowI1RAjwSmgOBtz").update({ tripName: 'yo'});
 
-		//database.ref("-KfuTowI1RAjwSmgOBtz").update({
-		database.ref("" + editUniqueId + "").update({
-			tripName: tripName,
-			originCoordinates: originCoordinates,
-			originName: originName,
-			destinationCoordinates: destinationCoordinates,
-			destinationName: destinationName,
-			departStart: departStart,
-			departEnd: departEnd,
-			travelMode: travelMode,
-			dateAdded: firebase.database.ServerValue.TIMESTAMP
-		});
+			//database.ref("-KfuTowI1RAjwSmgOBtz").update({
+			database.ref("" + editUniqueId + "").update({
+				tripName: tripName,
+				originCoordinates: originCoordinates,
+				originName: originName,
+				destinationCoordinates: destinationCoordinates,
+				destinationName: destinationName,
+				departStart: departStart,
+				departEnd: departEnd,
+				travelMode: travelMode,
+				dateAdded: firebase.database.ServerValue.TIMESTAMP
+			});
 
-		// Code needed to update html based on update above update
-		// html like row 161
-		// need to know id/class of element being updated. maybe based on snapshot.key
-		// will finish tomorrow
+			// Code needed to update html based on update above update
+			// html like row 161
+			// need to know id/class of element being updated. maybe based on snapshot.key
+			// will finish tomorrow
 
-		// needed for edit ubtton //
-		editStauts = false;
-	}
-	else { // new record
-		database.ref().push({
-			tripName: tripName,
-			originCoordinates: originCoordinates,
-			originName: originName,
-			destinationCoordinates: destinationCoordinates,
-			destinationName: destinationName,
-			departStart: departStart,
-			departEnd: departEnd,
-			travelMode: travelMode,
-			dateAdded: firebase.database.ServerValue.TIMESTAMP
-		});
-	}
+			// needed for edit ubtton //
+			editStauts = false;
+		}
+		else { // new record
+			database.ref().push({
+				tripName: tripName,
+				originCoordinates: originCoordinates,
+				originName: originName,
+				destinationCoordinates: destinationCoordinates,
+				destinationName: destinationName,
+				departStart: departStart,
+				departEnd: departEnd,
+				travelMode: travelMode,
+				dateAdded: firebase.database.ServerValue.TIMESTAMP
+			});
+		}
 
-	// navigate to phase 3 //
-	showSection(phase3a);
-});
+		// navigate to phase 3 //
+		showSection(phase3a);
+
+		getUserLocation();
+	});
+}
 
 // add list of trips to phase //
 database.ref().on("child_added", function(snapshot) {
@@ -175,6 +183,10 @@ database.ref().on("child_added", function(snapshot) {
 database.ref().orderByChild("dateAdded").limitToLast(1).on("child_added", function(snapshot) {
 	// the below code will return anything saved in firebase to phase 3
 	editUniqueId = snapshot.getKey();
+	originCoordinates = snapshot.val().originCoordinates;
+	console.log("These are origin coordinates accessible to view page: " + originCoordinates);
+	travelMode = snapshot.val().travelMode;
+	console.log("This is travel mode accessible to view page: " + travelMode);
 	console.log("editUniqueId " + editUniqueId);
 	$(".trip-name").text(snapshot.val().tripName);
 	$(".selected-origin-station").text(snapshot.val().originName);
@@ -201,6 +213,7 @@ $("#cancel").on("click", function() {
 $(".edit").on("click", function() {
 	editStauts = true;
 	showSection(phase2);
+	addSaveTripClickListener();
 });
 // view trips: navigate to phase 1
 $(".listView").on("click", function() {
@@ -210,5 +223,45 @@ $(".listView").on("click", function() {
 
 ///////////////////////////////////
 
+//// Maps API integration ///
 
+function initMap() {
+	addSaveTripClickListener();
+}
 
+function getUserLocation() {
+	if (navigator.geolocation) {
+		navigator.geolocation.getCurrentPosition(function(position) {
+			var pos = {
+				lat: position.coords.latitude,
+				lng: position.coords.longitude
+    		};
+    		console.log("Postion is " + pos.lat + "," + pos.lng);
+    		var latitude = pos.lat.toString();
+    		var longitude = pos.lng.toString();
+    		var userOrigin = (latitude + "," + longitude);
+    		console.log(userOrigin); 
+    		var directionsService = new google.maps.DirectionsService;
+    		calculateRoute(directionsService, userOrigin);
+  		})
+	} else {
+  	console.log("Error: things aren't working.");
+	}
+}
+
+function calculateRoute(directionsService, userOrigin) {
+	console.log("Origin Coordinates being used in calculating route are : " + originCoordinates);
+	directionsService.route({
+		origin: userOrigin,
+		destination: originCoordinates,
+		travelMode: travelMode
+	}, function(response, status) {
+		if (status === 'OK') {
+			var route = response.routes[0];
+			$(".walking-distance").html(route.legs[0].distance.text + "/ ");
+			$(".walking-estimate").html(route.legs[0].duration.text);
+  		} else {
+    		window.alert('Directions request failed due to ' + status);
+  		}
+	});
+}
