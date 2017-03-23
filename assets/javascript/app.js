@@ -245,6 +245,12 @@ function getUserLocation() {
     		console.log(userOrigin); 
     		var directionsService = new google.maps.DirectionsService;
     		calculateRoute(directionsService, userOrigin);
+    		if (travelMode === "WALKING") {
+    			alternativeTravelMode = "DRIVING";
+    		} else {
+    			alternativeTravelMode = "WALKING";
+    		}
+    		calculateAlternativeRoute(directionsService, userOrigin, alternativeTravelMode);
   		})
 	} else {
   	console.log("Error: things aren't working.");
@@ -273,3 +279,27 @@ function calculateRoute(directionsService, userOrigin) {
   		}
 	});
 }
+
+function calculateAlternativeRoute(directionsService, userOrigin, alternativeTravelMode) {
+	console.log("Origin Coordinates being used in calculating route are : " + originCoordinates);
+	console.log("Alternative travel mode available for alternative calculations : " + alternativeTravelMode);
+	directionsService.route({
+		origin: userOrigin,
+		destination: originCoordinates,
+		travelMode: alternativeTravelMode,
+	}, function(response, status) {
+		if (status === 'OK') {
+			var route = response.routes[0];
+			if (alternativeTravelMode === "WALKING") {
+				$(".walking-distance").html(route.legs[0].distance.text + "/ ");
+				$(".walking-estimate").html(route.legs[0].duration.text);
+			} else if (alternativeTravelMode === "DRIVING") {
+				$(".driving-distance").html(route.legs[0].distance.text + "/ ");
+				$(".driving-estimate").html(route.legs[0].duration.text);
+			}
+			
+  		} else {
+    		window.alert('Directions request failed due to ' + status);
+  		}
+	});
+} 
