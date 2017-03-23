@@ -10,13 +10,13 @@
 // firebase.initializeApp(config);
 // var database = firebase.database();
 
-//// juan's fire base api ////
+//// meggin's fire base api ////
 var config = {
-	apiKey: "AIzaSyBS6nowOI7CgfhnS-hM3A5BUxh58k7NdVo",
-	authDomain: "test-d1af2.firebaseapp.com",
-	databaseURL: "https://test-d1af2.firebaseio.com",
-	storageBucket: "test-d1af2.appspot.com",
-	messagingSenderId: "395340255814"
+	apiKey: "AIzaSyCNU5CN43KJZiTfFgMCIpWPMLBIiVUQ8Fo",
+	authDomain: "bart-on-time.firebaseapp.com",
+	databaseURL: "https://bart-on-time.firebaseio.com",
+	storageBucket: "bart-on-time.appspot.com",
+	messagingSenderId: "258285045447"
 };
 firebase.initializeApp(config);
 var database = firebase.database();
@@ -95,11 +95,11 @@ $("#save").on("click", function(event) {
 	// Grabbed values from text boxes //
 	tripName = $("#tripName-input").val().trim();
 	console.log(tripName);
-	originCoordinates = $(".origin-selection").val().trim();
-	originName = $(".origin-selection").html().trim();
+	originCoordinates = $("#origin-station option:selected").val().trim();
+	originName = $("#origin-station option:selected").html().trim();
 	console.log(originName);
-	destinationCoordinates = $(".destination-selection").val().trim();
-	destinationName = $(".origin-selection").html().trim();
+	destinationCoordinates = $("#destination-station option:selected").val().trim();
+	destinationName = $("#destination-station option:selected").html().trim();
 
 	departStart = $("#departStart-input").val().trim();
 	departEnd = $("#departEnd-input").val().trim();
