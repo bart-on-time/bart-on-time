@@ -29,86 +29,150 @@
       
       // Declare global variables
       var apiKey = "ZPZZ-PTE2-9NWT-DWE9"
-      var orig = "EMBR";
-      var dest = "WOAK";
+      var orig = "ASHB";
+      var dest = "EMBR";
 
-      // Data object for Real Time Train ETA
-      var xmlObjRealTime = {
-        uri: null,
-        date: null,
-        time: null,
-        station: {
-          name: null,
-          abbr: null,
-          etd: []
-        }
-      }
-      // Data object for scheduled departure time object
-      var xmlObjSchd = {
-        uri: null,
-        origin: null,
-        destination: null,
-        schedule: {
-          date: null,
-          time: null,
-          before: null,
-          after: null,
-          request: []
-        }
-      }
+      // Global varibles that will be assigned during AJAX function execution
+      var newTrainHeadStnArray = [];
+      var newEtdArray;
+      var trainHeadStn;
+      var eta;
 
-
-      // Two AJAX functions for two BART API calls on page load
-      $(document).ready(nextTrainAjax(orig, dest), startTime());
-
-      // On clicking "Get ETA"
-      $(document).on("click", "#getETA", function(){
-
-        // Two BART API calls
+      // On page load, make two AJAX functions for BART API
+      $(document).ready(function(){
         nextTrainAjax(orig, dest);
-
+        startTime();
         // Display Origin Station and Destination Station
         $('#origin').html("origin: " + orig);
         $('#destination').html("destination: " + dest);
+      });
 
-        // Store all of request objects from schedule API response and convert to list of 
-        var newRequestArray = xmlObjSchd.schedule.request;
-
-        // Loop through the schedule request object to find all trains whose directions are towards our destination
-        var newTrainHeadStnArray = [];
-        for (var i = 0; i < newRequestArray.length; i++) {
-          var newTrainHeadStn = newRequestArray[i].legs[0].trainHeadStation;
-          newTrainHeadStnArray.push(newTrainHeadStn);
-        }
-        console.log(newTrainHeadStnArray);
-
-        // ETA variable
-        var eta = "";
-
-        // Store all of etd objects from real time API reponse
-        var newEtdArray = xmlObjRealTime.station.etd;
+      // On clicking "Get ETA"
+      $(document).on("click", "#getETA", function(){
+        // Two BART API calls
+        nextTrainAjax(orig, dest);
 
         // Loop through the array of ETD objects (which is already sorted by earliest time) and cross match with the Train array (newTrainHeadStnArray), and print out its associated ETA
         for (var i = 0; i < newEtdArray.length; i++) {
           if (newTrainHeadStnArray.indexOf(newEtdArray[i].abbreviation) !== -1 ) {
-            var trainHeadStn = newEtdArray[i].abbreviation;
-            $('.headStation').html(trainHeadStn + " direction train");
-
+            trainHeadStn = newEtdArray[i].abbreviation;
             eta = newEtdArray[i].estimate[0].minutes;
-            $('#etd').html("next train arrives in: " + eta + " mins");
             if (eta === "Leaving") {
               eta = "0";
             }
             // Debug
             console.log("THIS IS THE ETA: " + eta);
-            return;
+            break;
           }
         }
+
+        $('#headStation').html(trainHeadStn + " direction train");
+        $('#etd').html("next train arrives in: " + eta + " mins");
+
       });
 
       // AJAX FUNCTIONS 
       function nextTrainAjax(origStn, destStn) {
-        // First AJAX function - Real Time Train ETA
+
+        // Data object for scheduled departure time object
+        var xmlObjSchd = {
+          uri: null,
+          origin: null,
+          destination: null,
+          schedule: {
+            date: null,
+            time: null,
+            before: null,
+            after: null,
+            request: []
+          }
+        }
+        // Data object for Real Time Train ETA
+        var xmlObjRealTime = {
+          uri: null,
+          date: null,
+          time: null,
+          station: {
+            name: null,
+            abbr: null,
+            etd: []
+          }
+        }
+
+        // 1st AJAX Fucntion - Departure Time Schedule
+        $.ajax({
+          type: "GET",
+          url: "http://api.bart.gov/api/sched.aspx?cmd=arrive&orig=" + origStn + "&dest=" + destStn + "&date=now&key=" + apiKey + "&b=0&a=3&l=1",
+          dataType: "text"
+          //async: false,
+          //contentType: "text/xml; charset=\"utf-8\""
+        }).done(function(response) {
+          // For debugging API call
+          //console.log(response);
+
+          // Use .parseXML() functino (core jQuery)
+          var xmlRaw = $.parseXML(response)
+          // This is the entire XML doc needed
+          var xml = xmlRaw.childNodes[0]
+
+          // Mapping relevant object properties to XML elements
+          xmlObjSchd.uri = xml.getElementsByTagName("uri")[0].innerHTML;
+          xmlObjSchd.origin = xml.getElementsByTagName("origin")[0].innerHTML;
+          xmlObjSchd.destination = xml.getElementsByTagName("destination")[0].innerHTML;
+          xmlObjSchd.schedule.date = xml.getElementsByTagName("date")[0].innerHTML;
+          xmlObjSchd.schedule.time = xml.getElementsByTagName("time")[0].innerHTML;
+          xmlObjSchd.schedule.before = xml.getElementsByTagName("before")[0].innerHTML;
+          xmlObjSchd.schedule.after = xml.getElementsByTagName("after")[0].innerHTML;
+
+          var tripsRaw = xml.getElementsByTagName("request")[0].getElementsByTagName("trip");
+          //console.log(requestRaw)
+          for (var i = 0; i < tripsRaw.length; i++) {
+            //console.log(tripsRaw[i]);
+            var trip = {
+              origin: tripsRaw[i].getAttribute("origin"),
+              destination: tripsRaw[i].getAttribute("destination"),
+              origTimeMin: tripsRaw[i].getAttribute("origTimeMin"),
+              origTimeDate: tripsRaw[i].getAttribute("origTimeDate"),
+              destTimeMin: tripsRaw[i].getAttribute("destTimeMin"),
+              destTimeDate: tripsRaw[i].getAttribute("destTimeDate"),
+              tripTime: tripsRaw[i].getAttribute("tripTime"),
+              legs: []
+            }
+
+            var legsRaw = tripsRaw[i].getElementsByTagName("leg");
+            for (var j = 0; j < legsRaw.length; j++) {
+              var leg = {
+                order: legsRaw[j].getAttribute("order"),
+                origin: legsRaw[j].getAttribute("origin"),
+                destination: legsRaw[j].getAttribute("destination"),
+                origTimeMin: legsRaw[j].getAttribute("origTimeMin"),
+                origTimeDate: legsRaw[j].getAttribute("origTimeDate"),
+                destTimeMin: legsRaw[j].getAttribute("destTimeMin"),
+                destTimeDate: legsRaw[j].getAttribute("destTimeDate"),
+                trainHeadStation: legsRaw[j].getAttribute("trainHeadStation")
+              }
+              trip.legs.push(leg)
+            }
+            xmlObjSchd.schedule.request.push(trip);
+          }
+          // Debug
+          //console.log(xmlObjSchd);
+
+          // Store all of request objects from schedule API response
+          var newRequestArray = xmlObjSchd.schedule.request;
+          // First clear the existing array elements
+          newTrainHeadStnArray = [];
+          // Loop through the schedule request object to find all trains whose directions are towards our destination
+          for (var i = 0; i < newRequestArray.length; i++) {
+            var newTrainHeadStn = newRequestArray[i].legs[0].trainHeadStation;
+            newTrainHeadStnArray.push(newTrainHeadStn);
+          }
+          console.log(newTrainHeadStnArray);
+
+        });
+        // END OF 1ST AJAX FUNCTION
+
+        // 2nd AJAX function - Real Time Train ETA
         $.ajax({
           type: "GET",
           url: "http://api.bart.gov/api/etd.aspx?cmd=etd&orig=" + origStn + "&key=" + apiKey,
@@ -178,71 +242,11 @@
 
           // Debugging 
           //console.log(xmlObjRealTime);
+
+          // Store all of etd objects from real time API reponse into the global variable newEtdArray
+          newEtdArray = xmlObjRealTime.station.etd;
         });
         // END OF 2ND AJAX FUNCTION
-
-
-        // Second AJAX Fucntion - Departure Time Schedule
-        $.ajax({
-          type: "GET",
-          url: "http://api.bart.gov/api/sched.aspx?cmd=arrive&orig=" + origStn + "&dest=" + destStn + "&date=now&key=" + apiKey + "&b=0&a=3&l=1",
-          dataType: "text"
-          //async: false,
-          //contentType: "text/xml; charset=\"utf-8\""
-        }).done(function(response) {
-          // For debugging API call
-          //console.log(response);
-
-          // Use .parseXML() functino (core jQuery)
-          var xmlRaw = $.parseXML(response)
-          // This is the entire XML doc needed
-          var xml = xmlRaw.childNodes[0]
-
-          // Mapping relevant object properties to XML elements
-          xmlObjSchd.uri = xml.getElementsByTagName("uri")[0].innerHTML;
-          xmlObjSchd.origin = xml.getElementsByTagName("origin")[0].innerHTML;
-          xmlObjSchd.destination = xml.getElementsByTagName("destination")[0].innerHTML;
-          xmlObjSchd.schedule.date = xml.getElementsByTagName("date")[0].innerHTML;
-          xmlObjSchd.schedule.time = xml.getElementsByTagName("time")[0].innerHTML;
-          xmlObjSchd.schedule.before = xml.getElementsByTagName("before")[0].innerHTML;
-          xmlObjSchd.schedule.after = xml.getElementsByTagName("after")[0].innerHTML;
-
-          var tripsRaw = xml.getElementsByTagName("request")[0].getElementsByTagName("trip");
-          //console.log(requestRaw)
-          for (var i = 0; i < tripsRaw.length; i++) {
-            //console.log(tripsRaw[i]);
-            var trip = {
-              origin: tripsRaw[i].getAttribute("origin"),
-              destination: tripsRaw[i].getAttribute("destination"),
-              origTimeMin: tripsRaw[i].getAttribute("origTimeMin"),
-              origTimeDate: tripsRaw[i].getAttribute("origTimeDate"),
-              destTimeMin: tripsRaw[i].getAttribute("destTimeMin"),
-              destTimeDate: tripsRaw[i].getAttribute("destTimeDate"),
-              tripTime: tripsRaw[i].getAttribute("tripTime"),
-              legs: []
-            }
-
-            var legsRaw = tripsRaw[i].getElementsByTagName("leg");
-            for (var j = 0; j < legsRaw.length; j++) {
-              var leg = {
-                order: legsRaw[j].getAttribute("order"),
-                origin: legsRaw[j].getAttribute("origin"),
-                destination: legsRaw[j].getAttribute("destination"),
-                origTimeMin: legsRaw[j].getAttribute("origTimeMin"),
-                origTimeDate: legsRaw[j].getAttribute("origTimeDate"),
-                destTimeMin: legsRaw[j].getAttribute("destTimeMin"),
-                destTimeDate: legsRaw[j].getAttribute("destTimeDate"),
-                trainHeadStation: legsRaw[j].getAttribute("trainHeadStation")
-              }
-              trip.legs.push(leg)
-            }
-            xmlObjSchd.schedule.request.push(trip);
-          }
-          // Debug
-          //console.log(xmlObjSchd);
-        });
-        // END OF 2ND AJAX FUNCTION
-
       }
 
 
