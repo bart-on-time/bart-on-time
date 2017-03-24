@@ -29,8 +29,8 @@
       
       // Declare global variables
       var apiKey = "ZPZZ-PTE2-9NWT-DWE9"
-      var orig = "ASHB";
-      var dest = "EMBR";
+      var orig = "EMBR";
+      var dest = "WOAK";
 
       // Data object for Real Time Train ETA
       var xmlObjRealTime = {
@@ -58,39 +58,53 @@
       }
 
 
-      // Two AJAX functions for two BART API calls
+      // Two AJAX functions for two BART API calls on page load
       $(document).ready(nextTrainAjax(orig, dest), startTime());
 
+      // On clicking "Get ETA"
       $(document).on("click", "#getETA", function(){
+
+        // Two BART API calls
         nextTrainAjax(orig, dest);
+
         // Display Origin Station and Destination Station
         $('#origin').html("origin: " + orig);
         $('#destination').html("destination: " + dest);
 
-        // The following Station code (4-letter) gives the Final Station to which our next earliest train to is headed
-        var trainHeadStn = xmlObjSchd.schedule.request[0].legs[0].trainHeadStation
-        $('#headStation').html(trainHeadStn + " headed train");
+        // Store all of request objects from schedule API response and convert to list of 
+        var newRequestArray = xmlObjSchd.schedule.request;
+
+        // Loop through the schedule request object to find all trains whose directions are towards our destination
+        var newTrainHeadStnArray = [];
+        for (var i = 0; i < newRequestArray.length; i++) {
+          var newTrainHeadStn = newRequestArray[i].legs[0].trainHeadStation;
+          newTrainHeadStnArray.push(newTrainHeadStn);
+        }
+        console.log(newTrainHeadStnArray);
 
         // ETA variable
         var eta = "";
 
         // Store all of etd objects from real time API reponse
         var newEtdArray = xmlObjRealTime.station.etd;
-        // Debug
-        console.log(newEtdArray);
 
-        // TEMPORARY HACK: Loop through the array and find the earliest train headed to trainHeadStn, and print out its associated ETA
+        // Loop through the array of ETD objects (which is already sorted by earliest time) and cross match with the Train array (newTrainHeadStnArray), and print out its associated ETA
         for (var i = 0; i < newEtdArray.length; i++) {
-          if (newEtdArray[i].abbreviation === trainHeadStn) {
+          if (newTrainHeadStnArray.indexOf(newEtdArray[i].abbreviation) !== -1 ) {
+            var trainHeadStn = newEtdArray[i].abbreviation;
+            $('#headStation').html(trainHeadStn + " direction train");
+
             eta = newEtdArray[i].estimate[0].minutes;
             $('#etd').html("next train arrives in: " + eta + " mins");
+            if (eta === "Leaving") {
+              eta = "0";
+            }
             // Debug
-            console.log(newEtdArray[i]);
+            console.log("THIS IS THE ETA: " + eta);
             return;
           }
         }
       });
-
 
       // AJAX FUNCTIONS 
       function nextTrainAjax(origStn, destStn) {
@@ -163,7 +177,7 @@
           }
 
           // Debugging 
-          console.log(xmlObjRealTime);
+          //console.log(xmlObjRealTime);
         });
         // END OF 2ND AJAX FUNCTION
 
@@ -224,8 +238,8 @@
             }
             xmlObjSchd.schedule.request.push(trip);
           }
-
-          console.log(xmlObjSchd);
+          // Debug
+          //console.log(xmlObjSchd);
         });
         // END OF 2ND AJAX FUNCTION
 
