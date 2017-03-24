@@ -85,7 +85,7 @@ function addTripClickListener() {
 		$(".walking-estimate").empty();
 		$(".driving-distance").empty();
 		$(".driving-estimate").empty();
-		$(".etd").empty();
+		//$(".etd").empty();
 
         // show relevant data related to clicked trip. displayed in phase 3
         //TODO: Add to firebase the orig and dest codes for Bart API.
@@ -206,13 +206,14 @@ function addSaveTripClickListener() {
 		$(".walking-estimate").empty();
 		$(".driving-distance").empty();
 		$(".driving-estimate").empty();
-		$(".etd").empty();
+		//$(".etd").empty();
 
 		//Bart API call.
         nextTrainAjax(orig, dest);
 
         // Loop through the array of ETD objects (which is already sorted by earliest time) and cross match with the Train array (newTrainHeadStnArray), and print out its associated ETA
         for (var i = 0; i < newEtdArray.length; i++) {
+        	console.log("New Train Head Stn Array i: " + newTrainHeadStnArray[i]);
         	if (newTrainHeadStnArray.indexOf(newEtdArray[i].abbreviation) !== -1 ) {
         		trainHeadStn = newEtdArray[i].abbreviation;
         		eta = newEtdArray[i].estimate[0].minutes;
@@ -221,6 +222,7 @@ function addSaveTripClickListener() {
         		}
         		// Debug
         		console.log("THIS IS THE ETA: " + eta);
+        		$("#eta").text(eta);
         		break;
         	}
         }
