@@ -44,30 +44,13 @@ var apiKeyBart = "ZPZZ-PTE2-9NWT-DWE9"
 var orig = "EMBR";
 var dest = "WOAK";
 
-// Data object for Real Time Train ETA
-var xmlObjRealTime = {
-  uri: null,
-  date: null,
-  time: null,
-  station: {
-    name: null,
-    abbr: null,
-    etd: []
-  }
-}
-// Data object for scheduled departure time object
-var xmlObjSchd = {
-  uri: null,
-  origin: null,
-  destination: null,
-  schedule: {
-    date: null,
-    time: null,
-    before: null,
-    after: null,
-    request: []
-  }
-}
+
+// Global varibles that will be assigned during AJAX function execution
+var newTrainHeadStnArray = [];
+var newEtdArray;
+var trainHeadStn;
+var eta;
+
 
 //// phase controller ////
 function showSection(section) {
@@ -87,6 +70,7 @@ function showSection(section) {
 $(document).ready(function() {
 	showSection(phase1);
 	initMap();
+	nextTrainAjax(orig, dest);
 	// Listens for trip click event.
 	//addTripClickListener();
 });
@@ -227,38 +211,18 @@ function addSaveTripClickListener() {
 		//Bart API call.
         nextTrainAjax(orig, dest);
 
-        // Store all of request objects from schedule API response and convert to list of 
-        var newRequestArray = xmlObjSchd.schedule.request;
-
-        // Loop through the schedule request object to find all trains whose directions are towards our destination
-        var newTrainHeadStnArray = [];
-        for (var i = 0; i < newRequestArray.length; i++) {
-          var newTrainHeadStn = newRequestArray[i].legs[0].trainHeadStation;
-          newTrainHeadStnArray.push(newTrainHeadStn);
-        }
-        console.log(newTrainHeadStnArray);
-
-        // ETA variable
-        var eta = "";
-
-        // Store all of etd objects from real time API reponse
-        var newEtdArray = xmlObjRealTime.station.etd;
-
         // Loop through the array of ETD objects (which is already sorted by earliest time) and cross match with the Train array (newTrainHeadStnArray), and print out its associated ETA
         for (var i = 0; i < newEtdArray.length; i++) {
-          if (newTrainHeadStnArray.indexOf(newEtdArray[i].abbreviation) !== -1 ) {
-            var trainHeadStn = newEtdArray[i].abbreviation;
-            $('.headStation').html(trainHeadStn + " direction train");
-
-            eta = newEtdArray[i].estimate[0].minutes;
-            $('#etd').html("next train arrives in: " + eta + " mins");
-            if (eta === "Leaving") {
-              eta = "0";
-            }
-            // Debug
-            console.log("THIS IS THE ETA: " + eta);
-            return;
-          }
+        	if (newTrainHeadStnArray.indexOf(newEtdArray[i].abbreviation) !== -1 ) {
+        		trainHeadStn = newEtdArray[i].abbreviation;
+        		eta = newEtdArray[i].estimate[0].minutes;
+        		if (eta === "Leaving") {
+        			eta = "0";
+        		}
+        		// Debug
+        		console.log("THIS IS THE ETA: " + eta);
+        		break;
+        	}
         }
 
 		//getUserLocation();
@@ -415,139 +379,178 @@ function calculateAlternativeRoute(directionsService, userOrigin, alternativeTra
 
 // AJAX FUNCTIONS 
 function nextTrainAjax(orig, dest) {
-  // First AJAX function - Real Time Train ETA
-  $.ajax({
-    type: "GET",
-    url: "http://api.bart.gov/api/etd.aspx?cmd=etd&orig=" + orig + "&key=" + apiKeyBart,
-    dataType: "text"
-    //async: false,
-    //contentType: "text/xml; charset=\"utf-8\""
-  }).done(function(response) {
-    // For debugging API call
-    console.log(response);
-    // Use .parseXML() functino (core jQuery)
-    var xmlRaw = $.parseXML(response)
-    // This is the entire XML doc needed
-    var xml = xmlRaw.childNodes[0]
 
-    // Mapping relevant object properties to XML elements
-    xmlObjRealTime.uri = xml.getElementsByTagName("uri")[0].innerHTML;
-    xmlObjRealTime.date = xml.getElementsByTagName("date")[0].innerHTML;
-    xmlObjRealTime.time = xml.getElementsByTagName("time")[0].innerHTML;
-    // Mapping to certain XML elements selected by children index (also can use getElementsByTagName("name"), etc)
-    xmlObjRealTime.station.name = xml.children[3].children[0].innerHTML;
-    xmlObjRealTime.station.abbr = xml.children[3].children[1].innerHTML;
+	// Data object for Real Time Train ETA
+	var xmlObjRealTime = {
+	  uri: null,
+	  date: null,
+	  time: null,
+	  station: {
+	    name: null,
+	    abbr: null,
+	    etd: []
+	  }
+	}
+	// Data object for scheduled departure time object
+	var xmlObjSchd = {
+	  uri: null,
+	  origin: null,
+	  destination: null,
+	  schedule: {
+	    date: null,
+	    time: null,
+	    before: null,
+	    after: null,
+	    request: []
+	  }
+	}
 
-    // Loop through multiple <etd> XML elements, where etd stands for "Estimated Time of Departure"
-    var etdArray = xml.getElementsByTagName("etd");
-    for (var i = 0; i < etdArray.length; i++) {
+	// 1st AJAX Fucntion - Departure Time Schedule
+	$.ajax({
+	type: "GET",
+	url: "http://api.bart.gov/api/sched.aspx?cmd=arrive&orig=" + orig + "&dest=" + dest + "&date=now&key=" + apiKeyBart + "&b=0&a=3&l=1",
+	dataType: "text"
+	//async: false,
+	//contentType: "text/xml; charset=\"utf-8\""
+	}).done(function(response) {
+	// For debugging API call
+	//console.log(response);
 
-      // Create an empty variable object to hold properties in between loops
-      var etdChild = {
-        destination: null,
-        abbreviation: null,
-        limited: null,
-        estimate: []
-      };
+	// Use .parseXML() functino (core jQuery)
+	var xmlRaw = $.parseXML(response)
+	// This is the entire XML doc needed
+	var xml = xmlRaw.childNodes[0]
 
-      // Assign element innerHTML to empty object properties
-      etdChild.destination = etdArray[i].getElementsByTagName("destination")[0].innerHTML;
-      etdChild.abbreviation = etdArray[i].getElementsByTagName("abbreviation")[0].innerHTML;
-      etdChild.limited = etdArray[i].getElementsByTagName("limited")[0].innerHTML;
-      
-      // Loop through multiple <estimate> XML elements within an <etd> tag
-      var estimateRaw = etdArray[i].getElementsByTagName("estimate");
-      for (var j = 0; j < estimateRaw.length; j++) {
+	// Mapping relevant object properties to XML elements
+	xmlObjSchd.uri = xml.getElementsByTagName("uri")[0].innerHTML;
+	xmlObjSchd.origin = xml.getElementsByTagName("origin")[0].innerHTML;
+	xmlObjSchd.destination = xml.getElementsByTagName("destination")[0].innerHTML;
+	xmlObjSchd.schedule.date = xml.getElementsByTagName("date")[0].innerHTML;
+	xmlObjSchd.schedule.time = xml.getElementsByTagName("time")[0].innerHTML;
+	xmlObjSchd.schedule.before = xml.getElementsByTagName("before")[0].innerHTML;
+	xmlObjSchd.schedule.after = xml.getElementsByTagName("after")[0].innerHTML;
 
-        // Create another empty variable object to hold properties in between the loops within the loop
-        var estimateChild = {
-          minutes: null,
-          platform: null,
-          direction: null,
-          trainLength: null,
-          hexcolor: null
-        };
+	var tripsRaw = xml.getElementsByTagName("request")[0].getElementsByTagName("trip");
+	//console.log(requestRaw)
+	for (var i = 0; i < tripsRaw.length; i++) {
+	  //console.log(tripsRaw[i]);
+	  var trip = {
+	    origin: tripsRaw[i].getAttribute("origin"),
+	    destination: tripsRaw[i].getAttribute("destination"),
+	    origTimeMin: tripsRaw[i].getAttribute("origTimeMin"),
+	    origTimeDate: tripsRaw[i].getAttribute("origTimeDate"),
+	    destTimeMin: tripsRaw[i].getAttribute("destTimeMin"),
+	    destTimeDate: tripsRaw[i].getAttribute("destTimeDate"),
+	    tripTime: tripsRaw[i].getAttribute("tripTime"),
+	    legs: []
+	  }
 
-        // Assign element innerHTML to empty object properties
-        estimateChild.minutes = estimateRaw[j].getElementsByTagName("minutes")[0].innerHTML;
-        estimateChild.platform = estimateRaw[j].getElementsByTagName("platform")[0].innerHTML;
-        estimateChild.direction = estimateRaw[j].getElementsByTagName("direction")[0].innerHTML;
-        estimateChild.trainLength = estimateRaw[j].getElementsByTagName("length")[0].innerHTML;
-        estimateChild.hexcolor = estimateRaw[j].getElementsByTagName("hexcolor")[0].innerHTML;
+	  var legsRaw = tripsRaw[i].getElementsByTagName("leg");
+	  for (var j = 0; j < legsRaw.length; j++) {
+	    var leg = {
+	      order: legsRaw[j].getAttribute("order"),
+	      origin: legsRaw[j].getAttribute("origin"),
+	      destination: legsRaw[j].getAttribute("destination"),
+	      origTimeMin: legsRaw[j].getAttribute("origTimeMin"),
+	      origTimeDate: legsRaw[j].getAttribute("origTimeDate"),
+	      destTimeMin: legsRaw[j].getAttribute("destTimeMin"),
+	      destTimeDate: legsRaw[j].getAttribute("destTimeDate"),
+	      trainHeadStation: legsRaw[j].getAttribute("trainHeadStation")
+	    }
+	    trip.legs.push(leg)
+	  }
+	  xmlObjSchd.schedule.request.push(trip);
+	}
+	// Debug
+	// console.log(xmlObjSchd);
 
-        // Push the resulting object to esdChild.estimate array declared outside of the current loop
-        etdChild.estimate.push(estimateChild);
-      }
+	// Store all of request objects from schedule API response
+	var newRequestArray = xmlObjSchd.schedule.request;
+	// First clear the existing array elements
+	newTrainHeadStnArray = [];
+	// Loop through the schedule request object to find all trains whose directions are towards our destination
+	for (var i = 0; i < newRequestArray.length; i++) {
+		var newTrainHeadStn = newRequestArray[i].legs[0].trainHeadStation;
+		newTrainHeadStnArray.push(newTrainHeadStn);
+	}
 
-      // Push the resulting object to xmlObjRealTime.station.etd array declared globally
-      xmlObjRealTime.station.etd.push(etdChild);
-    }
+	});
+	// END OF 1ST AJAX FUNCTION
 
-    // Debugging 
-    //console.log(xmlObjRealTime);
-  });
-  // END OF 2ND AJAX FUNCTION
+	// 2nd AJAX function - Real Time Train ETA
+	$.ajax({
+		type: "GET",
+		url: "http://api.bart.gov/api/etd.aspx?cmd=etd&orig=" + orig + "&key=" + apiKeyBart,
+		dataType: "text"
+		//async: false,
+		//contentType: "text/xml; charset=\"utf-8\""
+		}).done(function(response) {
+		// For debugging API call
+		// console.log(response);
+		// Use .parseXML() functino (core jQuery)
+		var xmlRaw = $.parseXML(response)
+		// This is the entire XML doc needed
+		var xml = xmlRaw.childNodes[0]
 
+		// Mapping relevant object properties to XML elements
+		xmlObjRealTime.uri = xml.getElementsByTagName("uri")[0].innerHTML;
+		xmlObjRealTime.date = xml.getElementsByTagName("date")[0].innerHTML;
+		xmlObjRealTime.time = xml.getElementsByTagName("time")[0].innerHTML;
+		// Mapping to certain XML elements selected by children index (also can use getElementsByTagName("name"), etc)
+		xmlObjRealTime.station.name = xml.children[3].children[0].innerHTML;
+		xmlObjRealTime.station.abbr = xml.children[3].children[1].innerHTML;
 
-  // Second AJAX Fucntion - Departure Time Schedule
-  $.ajax({
-    type: "GET",
-    url: "http://api.bart.gov/api/sched.aspx?cmd=arrive&orig=" + orig + "&dest=" + dest + "&date=now&key=" + apiKeyBart + "&b=0&a=3&l=1",
-    dataType: "text"
-    //async: false,
-    //contentType: "text/xml; charset=\"utf-8\""
-  }).done(function(response) {
-    // For debugging API call
-    //console.log(response);
+		// Loop through multiple <etd> XML elements, where etd stands for "Estimated Time of Departure"
+		var etdArray = xml.getElementsByTagName("etd");
+		for (var i = 0; i < etdArray.length; i++) {
 
-    // Use .parseXML() functino (core jQuery)
-    var xmlRaw = $.parseXML(response)
-    // This is the entire XML doc needed
-    var xml = xmlRaw.childNodes[0]
+		  // Create an empty variable object to hold properties in between loops
+		  var etdChild = {
+		    destination: null,
+		    abbreviation: null,
+		    limited: null,
+		    estimate: []
+		  };
 
-    // Mapping relevant object properties to XML elements
-    xmlObjSchd.uri = xml.getElementsByTagName("uri")[0].innerHTML;
-    xmlObjSchd.origin = xml.getElementsByTagName("origin")[0].innerHTML;
-    xmlObjSchd.destination = xml.getElementsByTagName("destination")[0].innerHTML;
-    xmlObjSchd.schedule.date = xml.getElementsByTagName("date")[0].innerHTML;
-    xmlObjSchd.schedule.time = xml.getElementsByTagName("time")[0].innerHTML;
-    xmlObjSchd.schedule.before = xml.getElementsByTagName("before")[0].innerHTML;
-    xmlObjSchd.schedule.after = xml.getElementsByTagName("after")[0].innerHTML;
+		  // Assign element innerHTML to empty object properties
+		  etdChild.destination = etdArray[i].getElementsByTagName("destination")[0].innerHTML;
+		  etdChild.abbreviation = etdArray[i].getElementsByTagName("abbreviation")[0].innerHTML;
+		  etdChild.limited = etdArray[i].getElementsByTagName("limited")[0].innerHTML;
+		  
+		  // Loop through multiple <estimate> XML elements within an <etd> tag
+		  var estimateRaw = etdArray[i].getElementsByTagName("estimate");
+		  for (var j = 0; j < estimateRaw.length; j++) {
 
-    var tripsRaw = xml.getElementsByTagName("request")[0].getElementsByTagName("trip");
-    //console.log(requestRaw)
-    for (var i = 0; i < tripsRaw.length; i++) {
-      //console.log(tripsRaw[i]);
-      var trip = {
-        origin: tripsRaw[i].getAttribute("origin"),
-        destination: tripsRaw[i].getAttribute("destination"),
-        origTimeMin: tripsRaw[i].getAttribute("origTimeMin"),
-        origTimeDate: tripsRaw[i].getAttribute("origTimeDate"),
-        destTimeMin: tripsRaw[i].getAttribute("destTimeMin"),
-        destTimeDate: tripsRaw[i].getAttribute("destTimeDate"),
-        tripTime: tripsRaw[i].getAttribute("tripTime"),
-        legs: []
-      }
+		    // Create another empty variable object to hold properties in between the loops within the loop
+		    var estimateChild = {
+		      minutes: null,
+		      platform: null,
+		      direction: null,
+		      trainLength: null,
+		      hexcolor: null
+		    };
 
-      var legsRaw = tripsRaw[i].getElementsByTagName("leg");
-      for (var j = 0; j < legsRaw.length; j++) {
-        var leg = {
-          order: legsRaw[j].getAttribute("order"),
-          origin: legsRaw[j].getAttribute("origin"),
-          destination: legsRaw[j].getAttribute("destination"),
-          origTimeMin: legsRaw[j].getAttribute("origTimeMin"),
-          origTimeDate: legsRaw[j].getAttribute("origTimeDate"),
-          destTimeMin: legsRaw[j].getAttribute("destTimeMin"),
-          destTimeDate: legsRaw[j].getAttribute("destTimeDate"),
-          trainHeadStation: legsRaw[j].getAttribute("trainHeadStation")
-        }
-        trip.legs.push(leg)
-      }
-      xmlObjSchd.schedule.request.push(trip);
-    }
-    // Debug
-    console.log(xmlObjSchd);
-  });
-  // END OF 2ND AJAX FUNCTION
+		    // Assign element innerHTML to empty object properties
+		    estimateChild.minutes = estimateRaw[j].getElementsByTagName("minutes")[0].innerHTML;
+		    estimateChild.platform = estimateRaw[j].getElementsByTagName("platform")[0].innerHTML;
+		    estimateChild.direction = estimateRaw[j].getElementsByTagName("direction")[0].innerHTML;
+		    estimateChild.trainLength = estimateRaw[j].getElementsByTagName("length")[0].innerHTML;
+		    estimateChild.hexcolor = estimateRaw[j].getElementsByTagName("hexcolor")[0].innerHTML;
+
+		    // Push the resulting object to esdChild.estimate array declared outside of the current loop
+		    etdChild.estimate.push(estimateChild);
+		  }
+
+		  // Push the resulting object to xmlObjRealTime.station.etd array declared globally
+		  xmlObjRealTime.station.etd.push(etdChild);
+		}
+
+		// Debugging 
+		//console.log(xmlObjRealTime);
+
+		// Store all of etd objects from real time API reponse into the global variable newEtdArray
+	    newEtdArray = xmlObjRealTime.station.etd;
+	});
+	// END OF 2ND AJAX FUNCTION
 
 }
