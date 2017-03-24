@@ -12,11 +12,11 @@
 
 //// meggin's fire base api ////
 var config = {
-	apiKey: "AIzaSyCNU5CN43KJZiTfFgMCIpWPMLBIiVUQ8Fo",
-	authDomain: "bart-on-time.firebaseapp.com",
-	databaseURL: "https://bart-on-time.firebaseio.com",
-	storageBucket: "bart-on-time.appspot.com",
-	messagingSenderId: "258285045447"
+	apiKey: "AIzaSyBS6nowOI7CgfhnS-hM3A5BUxh58k7NdVo",
+    authDomain: "test-d1af2.firebaseapp.com",
+    databaseURL: "https://test-d1af2.firebaseio.com",
+    storageBucket: "test-d1af2.appspot.com",
+    messagingSenderId: "395340255814"
 };
 firebase.initializeApp(config);
 var database = firebase.database();
@@ -59,7 +59,7 @@ function showSection(section) {
 $(document).ready(function() {
 	showSection(phase1);
 	// Listens for trip click event.
-	addTripClickListener();
+	//addTripClickListener();
 });
 
 // Fires when trip selected.
@@ -83,15 +83,17 @@ function addTripClickListener() {
         	$(".selected-destination-station").text(snapshot.val().destinationName + " ");
         });
 
-        getUserLocation();
+        //getUserLocation();
+        initMap();
     });
 };
 
 // new trip move to phase 2
 $("#new").on("click", function() {
 	showSection(phase2);
-	addSaveTripClickListener();
+	//addSaveTripClickListener();
 });
+addSaveTripClickListener();
 
 /////////////////////////////////
 
@@ -142,7 +144,13 @@ function addSaveTripClickListener() {
 			// html like row 161
 			// need to know id/class of element being updated. maybe based on snapshot.key
 			// will finish tomorrow
-
+			$("#" + editUniqueId).html(
+				  "<th class='trip-id'>" + editUniqueId + "</th>" + //maybe add id/class based on snapshot.getkey
+		          "<th>" + tripName + "</th>" +
+		          "<th>" + originName + "</th>" +
+		          "<th>" + departStart + "</th>" +
+		        "</tr>"
+			);
 			// needed for edit ubtton //
 			editStauts = false;
 		}
@@ -167,7 +175,7 @@ function addSaveTripClickListener() {
 		$(".driving-distance").empty();
 		$(".driving-estimate").empty();
 
-		getUserLocation();
+		//getUserLocation();
 	});
 }
 
@@ -176,7 +184,7 @@ database.ref().on("child_added", function(snapshot) {
 // Change the HTML to reflect
 	console.log("child: " + snapshot.val().tripName );
 	// Build up train table in DOM.
-	$("#trips").append("<tr class='clickable-row'>" +
+	$("#trips").append("<tr class='clickable-row'" + "id='" + snapshot.getKey() + "'>" +
 						  "<th class='trip-id'>" + snapshot.getKey() + "</th>" + //maybe add id/class based on snapshot.getkey
 	                      "<th>" + snapshot.val().tripName + "</th>" +
 	                      "<th>" + snapshot.val().originName + "</th>" +
@@ -222,7 +230,7 @@ $("#cancel").on("click", function() {
 $(".edit").on("click", function() {
 	editStauts = true;
 	showSection(phase2);
-	addSaveTripClickListener();
+	//addSaveTripClickListener();
 });
 // view trips: navigate to phase 1
 $(".listView").on("click", function() {
@@ -235,9 +243,12 @@ $(".listView").on("click", function() {
 //// Maps API integration ///
 
 function initMap() {
-	addSaveTripClickListener();
-	addTripClickListener();
+	//addSaveTripClickListener();
+	//addTripClickListener();
+	getUserLocation();
 }
+//initMap();
+addTripClickListener();
 
 function getUserLocation() {
 	if (navigator.geolocation) {
