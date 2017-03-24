@@ -21,6 +21,7 @@ var database = firebase.database();
 /////////////////////////////////
 
 //// vars ////
+var authSplash = $("#authSplash");
 var phase1 = $("#phase1");
 var phase2 = $("#phase2");
 var phase3a = $("#phase3a");
@@ -50,9 +51,16 @@ var trainHeadStn;
 var eta;
 var militaryETA;
 
+//**Todo: experimenting with oauth-- delete this if can't get working!
+//Global ID of currently signed-in user, needed for authentication.
+var currentUID;
+//**Todo: end of bit to delete if oauth experiment fails.
 
 //// phase controller ////
 function showSection(section) {
+
+	// Remember to remove this if oauth doesn't work.
+	authSplash.css({'display': 'none'});
 	phase1.css({'display': 'none'});
 	phase2.css({'display': 'none'});
 	phase3a.css({'display': 'none'});
@@ -67,7 +75,43 @@ function showSection(section) {
 //// phase 1: landing page list of trips ////
 // will be loaded on page load 
 $(document).ready(function() {
-	showSection(phase1);
+	
+	//**Todo: experimenting with oauth; delete everything from here till end,
+	// Assuming I can't get it to work!
+	  //Triggers every time user signs in or signs out.
+	showSection(authSplash);
+
+	firebase.auth().onAuthStateChanged(function(auth) {
+		var auth = firebase.auth().currentUser;
+
+	    //User authenticated and active session begins.
+	    if (auth != null) {
+	    	console.log('User authenticated: ' + auth);
+	    	writeUserData(auth.uid, auth.displayName, auth.email, auth.imageURL);
+	    //User isn't authenticated.
+	    } else {
+	    	console.log('User not authenticated.');
+	    }
+	});
+
+	// Need to properly bring in styling for google button.
+	$("#sign-in-with-google-button").on("click", function() {
+	  	var provider = new firebase.auth.GoogleAuthProvider();
+	  	firebase.auth().signInWithPopup(provider);
+	  	console.log('User signed into Google.');
+	  	showSection(phase1);
+	});
+
+	//Writes authenticated user's data to database.
+	function writeUserData(userId, name, email, imageUrl) {
+		firebase.database().ref('users/' + userId).set({
+	    	username: name,
+	    	email: email
+		});
+	}
+
+	//** End of Oauth experiment
+
 	nextTrainAjax(orig, dest);
 	getUserLocation();
 	// Loop through the array of ETD objects
