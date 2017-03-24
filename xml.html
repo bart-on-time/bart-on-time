@@ -92,7 +92,7 @@
         for (var i = 0; i < newEtdArray.length; i++) {
           if (newTrainHeadStnArray.indexOf(newEtdArray[i].abbreviation) !== -1 ) {
             var trainHeadStn = newEtdArray[i].abbreviation;
-            $('#headStation').html(trainHeadStn + " direction train");
+            $('.headStation').html(trainHeadStn + " direction train");
 
             eta = newEtdArray[i].estimate[0].minutes;
             $('#etd').html("next train arrives in: " + eta + " mins");
