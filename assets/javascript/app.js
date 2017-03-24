@@ -27,10 +27,10 @@ var phase3a = $("#phase3a");
 var phase3b = $("#phase3b");
 
 var tripName;
-var origin;
 var destination;
 var originCoordinates;
 var travelMode;
+var userOrigin;
 var alternativeTravelMode;
 // when user clicks edit
 var editUniqueId;
@@ -69,6 +69,7 @@ function showSection(section) {
 $(document).ready(function() {
 	showSection(phase1);
 	nextTrainAjax(orig, dest);
+	getUserLocation();
 	// Loop through the array of ETD objects
     //(which is already sorted by earliest time) and cross match with the Train array (newTrainHeadStnArray),
     // and print out its associated ETA
@@ -79,28 +80,30 @@ $(document).ready(function() {
 
 // Fires when trip selected.
 function addTripClickListener() {
-	$(".clickable-row").on("click", function() {
-        var tripId = $(this).children('.trip-id').text();
-        console.log("You clicked on this trip: " + tripId);
+	$("#trips").on("click", "tr", function() {
+		var tripId = $(this).children('.trip-id').text();
+		console.log("You clicked on this trip: " + tripId);
 
-        showSection(phase3a);
+		showSection(phase3a);
 
-        // show relevant data related to clicked trip. displayed in phase 3
-        database.ref("" + tripId + "").on("value", function(snapshot) { 
-        	console.log(snapshot.val().tripName);
-        	// the below code will return anything saved in firebase to phase 3
-        	$(".trip-name").text(snapshot.val().tripName);
-        	$("#selected-origin-station").text(snapshot.val().originName + " ");
-        	orig = snapshot.val().orig;
-        	console.log("This is the orig we need for ajax!: " + orig);
-        	dest = snapshot.val().dest;
-        	console.log("This is the dest we need for ajax!: " + dest);
-        	nextTrainAjax(orig, dest);
-        	// Loop through the array of ETD objects
-        	//(which is already sorted by earliest time) and cross match with the Train array (newTrainHeadStnArray),
-        	// and print out its associated ETA
-        	getNextArrivalTimeEstimate();
-        });
+		// show relevant data related to clicked trip. displayed in phase 3
+		database.ref("" + tripId + "").on("value", function(snapshot) { 
+			console.log(snapshot.val().tripName);
+			// the below code will return anything saved in firebase to phase 3
+			$(".trip-name").text(snapshot.val().tripName);
+			$("#selected-origin-station").text(snapshot.val().originName + " ");
+			orig = snapshot.val().orig;
+			console.log("This is the orig we need for ajax!: " + orig);
+			dest = snapshot.val().dest;
+			console.log("This is the dest we need for ajax!: " + dest);
+			nextTrainAjax(orig, dest);
+			// Loop through the array of ETD objects
+			//(which is already sorted by earliest time) and cross match with the Train array (newTrainHeadStnArray),
+			// and print out its associated ETA
+			getNextArrivalTimeEstimate();
+		});
+
+		initMap();
     });
 };
 
@@ -200,6 +203,8 @@ function addSaveTripClickListener() {
         //(which is already sorted by earliest time) and cross match with the Train array (newTrainHeadStnArray),
         // and print out its associated ETA
         getNextArrivalTimeEstimate();
+
+        initMap();
 	});
 }
 
@@ -303,11 +308,9 @@ function getNextArrivalTimeEstimate() {
 //// Maps API integration ///
 
 function initMap() {
-	//addSaveTripClickListener();
-	//addTripClickListener();
 	var directionsService = new google.maps.DirectionsService;
 
-	var userOrigin = getUserLocation();
+	getUserLocation();
     calculateRoute(directionsService, userOrigin);
 
     if (travelMode === "WALKING") {
@@ -316,21 +319,6 @@ function initMap() {
     	alternativeTravelMode = "WALKING";
     }
     calculateAlternativeRoute(directionsService, userOrigin, alternativeTravelMode);
-
-    var onChangeHandler = function() {
-        userOrigin = getUserLocation();
-        calculateAndDisplayRoute(directionsService, userOrigin);
-
-        if (travelMode === "WALKING") {
-    		alternativeTravelMode = "DRIVING";
-    	} else {
-    		alternativeTravelMode = "WALKING";
-    	}
-    	calculateAlternativeRoute(directionsService, userOrigin, alternativeTravelMode);
-    };
-
-    $("#save").on("click", onChangeHandler);
-    $("#trips").on("click", "clickable-row", onChangeHandler);
 }
 
 addTripClickListener();
@@ -345,24 +333,24 @@ function getUserLocation() {
     		console.log("Postion is " + pos.lat + "," + pos.lng);
     		var latitude = pos.lat.toString();
     		var longitude = pos.lng.toString();
-    		var currentUserOrigin = (latitude + "," + longitude);
-    		console.log(currentUserOrigin);  
-    		return currentUserOrigin;  		
+    		userOrigin = (latitude + "," + longitude);
+    		console.log("Is userOrigin at least OK?" + userOrigin);
   		})
 	} else {
   	console.log("Error: things aren't working.");
 	}
 }
 
-function calculateRoute(directionsService, userOrigin) {
-	console.log("Origin Coordinates being used in calculating route are : " + this.originCoordinates);
+function calculateRoute(directionsService) {
+	console.log("Origin Coordinates being used in calculating route are : " + originCoordinates);
 	directionsService.route({
 		origin: userOrigin,
-		destination: this.originCoordinates,
-		travelMode: this.travelMode,
+		destination: originCoordinates,
+		travelMode: travelMode,
 	}, function(response, status) {
 		if (status === 'OK') {
 			var route = response.routes[0];
+			console.log("What is so wrong with origin?" + route.origin);
 			if (travelMode === "WALKING") {
 				$(".walking-distance").html(route.legs[0].distance.text + "/ ");
 				$(".walking-estimate").html(route.legs[0].duration.text);
@@ -377,12 +365,12 @@ function calculateRoute(directionsService, userOrigin) {
 	});
 }
 
-function calculateAlternativeRoute(directionsService, userOrigin, alternativeTravelMode) {
-	console.log("Origin Coordinates being used in calculating route are : " + this.originCoordinates);
+function calculateAlternativeRoute(directionsService) {
+	console.log("Origin Coordinates being used in calculating route are : " + originCoordinates);
 	console.log("Alternative travel mode available for alternative calculations : " + alternativeTravelMode);
 	directionsService.route({
 		origin: userOrigin,
-		destination: this.originCoordinates,
+		destination: originCoordinates,
 		travelMode: alternativeTravelMode,
 	}, function(response, status) {
 		if (status === 'OK') {
