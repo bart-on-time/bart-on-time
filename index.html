@@ -29,27 +29,48 @@
       <header>BART ON TIME</header>
     </div>
 
-    <div class="main-container">
-      <section id="phase1">
-        <div class="panel-body">
-          <div class="table-responsive">
-            <table class="table">
-              <thead>
-                <tr class="table-head">
-                  <th class='trip-id'>Key (will remove)</th>
-                  <th>Trip Name</th>
-                  <th>Next Train To:</th>
-                  <th>Arrives At:</th>
-                </tr>
-              </thead>
-              <tbody id="trips">
+
+  <div class="col-lg-12">
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        <h3 class="panel-title">Saved Train Data:</h3>
+      </div>
+    <div class="panel-body">
+    <!-- Saved Trips-->
+     <form role="form">
+      <div class="table-responsive">
+      <div class="main-container">
+        <section id="phase1">
+          <div class="panel-body">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr class="table-head">
+                    <th class='trip-id'>Key (will remove)</th>
+                    <th>Trip Name</th>
+                    <th>Next Train To:</th>
+                    <th>Arrives At:</th>
+                  </tr>
+                </thead>
+                  <tbody id="trips">
                   <!-- List of stored trips here. -->
-              </tbody>
-            </table>
-          </div>
+                  </tbody>
+              </table>
+            </div>
           </div>
         <button class="btn btn-primary" id="new">New</button>
-      </section>
+       </div> 
+      </div>
+    </div>
+  </div>
+</div> 
+</section>     
+  <div class="col-lg-12">
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        <h3 class="panel-title">Phase2</h3>
+      </div>
+      <div class="panel-body">
       <section id="phase2">
         <div class="trip-input">
           <label for="tripName-input" class="travel2">Trip Name:</label>
@@ -87,7 +108,16 @@
         <button class="btn btn-primary" id="save">Save</button>
         <button class="btn btn-danger" id="cancel">Cancel</button>
       </section>
-      <section id="phase3a">
+      </div>
+      </div>
+      </div>
+  <div class="col-lg-12">
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        <h3 class="panel-title">Phase3</h3>
+      </div>
+      <div class="panel-body">
+       <section id="phase3a">
         <div class="view-trip">Now on <span class="trip-name"></span></div>
         <div class="simple">Start Your Trip (<span class="travel-mode">WALKING</span>) In:</div>
         <div class="leave-time-min">12 MINUTES</div>
@@ -103,6 +133,9 @@
         <button class="edit btn btn-primary">Edit</button>
         <button class="listView btn btn-primary">View Trips</button>
       </section>
+      </div>
+      </div>
+      </div>
       <section id="phase3b">
         <!-- will show selected trip or saved trip with edit or view trip options -->
         <button class="edit btn btn-primary">Edit</button>
