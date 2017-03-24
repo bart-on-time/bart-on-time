@@ -39,25 +39,35 @@
       </section>
       <!--End OAuth splash experiment-->
       <section id="phase1">
-        <div class="panel-body">
-          <div class="table-responsive">
-            <table class="table">
-              <thead>
-                <tr class="table-head">
-                  <th class='trip-id'>Key (will remove)</th>
-                  <th>Trip Name</th>
-                  <th>Next Train To:</th>
-                  <th>Arrives at Destination:</th>
-                </tr>
-              </thead>
-              <tbody id="trips">
-                  <!-- List of stored trips here. -->
-              </tbody>
-            </table>
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h3 class="panel-title">Your Saved Trips</h3>
+              </div>
+              <div class="panel-body">
+                <div class="table-responsive">
+                  <table class="table">
+                    <thead>
+                      <tr class="table-head">
+                        <th class='trip-id'>Key (will remove)</th>
+                        <th>Trip Name</th>
+                        <th>Next Train To:</th>
+                        <th>Arrives at Destination:</th>
+                      </tr>
+                    </thead>
+                    <tbody id="trips">
+                      <!-- List of stored trips here. -->
+                    </tbody>
+                  </table>
+                </div>
+                <button class="btn btn-primary" id="new">New</button>
+              </div>
+            </div>
           </div>
-          </div>
-        <button class="btn btn-primary" id="new">New</button>
+        </div>
       </section>
+      
       <section id="phase2">
         <div class="trip-input">
           <label for="tripName-input" class="travel2">Trip Name:</label>
