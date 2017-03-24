@@ -8,6 +8,9 @@
 
     <title>BART ON TIME</title>
 
+    <!-- Added Moment JS -->
+    <script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
+
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 
@@ -39,7 +42,7 @@
                   <th class='trip-id'>Key (will remove)</th>
                   <th>Trip Name</th>
                   <th>Next Train To:</th>
-                  <th>Arrives At:</th>
+                  <th>Arrives at Destination:</th>
                 </tr>
               </thead>
               <tbody id="trips">
@@ -69,6 +72,7 @@
           <option id="CIVC" class="destination-selection" value="37.77989899999997,-122.41356300000007">Civic Center Station</option>
           <option id="WOAK" class="origin-selection" value="37.80467476,-122.2945822">West Oakland Station</option>
         </select>
+        <!--
         <div class="depart-start-time">
           <label for="departStart-input">Between</label>
           <input class="depart-start-time" id="departStart-input" type="time" required>
@@ -77,6 +81,7 @@
           <label for="departEnd-input">And</label>
           <input class="depart-end-time" id="departEnd-input" type="time" required>
         </div>
+      -->
         <div class="travel"><strong>Travel to Station by (default):</strong>
           <br>
           <label class="radio-inline">
@@ -90,18 +95,18 @@
         <button class="btn btn-danger" id="cancel">Cancel</button>
       </section>
       <section id="phase3a">
-        <div class="view-trip">Now on <span class="trip-name"></span></div>
+        <div class="view-trip">Now on Trip: <span class="trip-name"></span></div>
         <div class="simple">Start Your Trip (<span class="travel-mode">WALKING</span>) In:</div>
         <div class="leave-time-min">12 MINUTES</div>
         <div>Your Next Train From <span id="selected-origin-station"></span></div>
         <div>Will Arrive In: <span id="eta"></span></div>
-        <div>Train to Take: <span class="headStation"></span><span class="destination-arrival-time-1">5:29 PM</span></div>
+        <div>Take Train Toward: <span class="headStation"></span><span id="destination-arrival-time-1"></span></div>
         <div>AVG DIST/WALKING TIME TO STATION: <span class="walking-distance"></span><span class="walking-estimate"></span></div>
         <div>AVG DIST/DRIVING TIME TO STATION: <span class="driving-distance"></span><span class="driving-estimate"></span></div>
-        <div>2nd Train Arrives In: <span class="two-train-arrival-time-min">19 MIN</span></div>
-        <div>Train to Take: <span class="headStation"></span><span class="etd-second">5:49 PM</span></div>
-        <div>3rd Train Arrives In: <span class="three-train-arrival-time-min">19 MIN</span></div>
-        <div>Train to Take: <span class="headStation"></span><span class="etd-third">7:09 PM</span></div>
+        <div>2nd Train Arrives In: <span id="two-train-arrival-time-min"></span></div>
+        <div>Train to Take: <span class="headStation"></span><span id="etd-second"></span></div>
+        <div>3rd Train Arrives In: <span id="three-train-arrival-time-min"></span></div>
+        <div>Train to Take: <span class="headStation"></span><span id="etd-third"></span></div>
         <button class="edit btn btn-primary">Edit</button>
         <button class="listView btn btn-primary">View Trips</button>
       </section>

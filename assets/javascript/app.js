@@ -30,8 +30,6 @@ var tripName;
 var origin;
 var destination;
 var originCoordinates;
-var departStart;
-var departEnd;
 var travelMode;
 var alternativeTravelMode;
 // when user clicks edit
@@ -50,6 +48,7 @@ var newTrainHeadStnArray = [];
 var newEtdArray;
 var trainHeadStn;
 var eta;
+var militaryETA;
 
 
 //// phase controller ////
@@ -69,8 +68,11 @@ function showSection(section) {
 // will be loaded on page load 
 $(document).ready(function() {
 	showSection(phase1);
-	initMap();
 	nextTrainAjax(orig, dest);
+	// Loop through the array of ETD objects
+    //(which is already sorted by earliest time) and cross match with the Train array (newTrainHeadStnArray),
+    // and print out its associated ETA
+    getNextArrivalTimeEstimate();
 	// Listens for trip click event.
 	//addTripClickListener();
 });
@@ -80,30 +82,25 @@ function addTripClickListener() {
 	$(".clickable-row").on("click", function() {
         var tripId = $(this).children('.trip-id').text();
         console.log("You clicked on this trip: " + tripId);
+
         showSection(phase3a);
-        $(".walking-distance").empty();
-		$(".walking-estimate").empty();
-		$(".driving-distance").empty();
-		$(".driving-estimate").empty();
-		//$(".etd").empty();
 
         // show relevant data related to clicked trip. displayed in phase 3
-        //TODO: Add to firebase the orig and dest codes for Bart API.
-		//TODO: Make sure to have these codes pulled up at all times needed when retrieving data.
         database.ref("" + tripId + "").on("value", function(snapshot) { 
-        	console.log(snapshot.val());
         	console.log(snapshot.val().tripName);
         	// the below code will return anything saved in firebase to phase 3
         	$(".trip-name").text(snapshot.val().tripName);
-        	$(".selected-origin-station").text(snapshot.val().originName + " ");
-        	$(".headStation").text(snapshot.val().destinationName + " ");
+        	$("#selected-origin-station").text(snapshot.val().originName + " ");
         	orig = snapshot.val().orig;
         	console.log("This is the orig we need for ajax!: " + orig);
         	dest = snapshot.val().dest;
         	console.log("This is the dest we need for ajax!: " + dest);
+        	nextTrainAjax(orig, dest);
+        	// Loop through the array of ETD objects
+        	//(which is already sorted by earliest time) and cross match with the Train array (newTrainHeadStnArray),
+        	// and print out its associated ETA
+        	getNextArrivalTimeEstimate();
         });
-
-        //getUserLocation();
     });
 };
 
@@ -135,9 +132,6 @@ function addSaveTripClickListener() {
 		destinationName = $("#destination-station option:selected").html().trim();
 		dest = $("#destination-station option:selected" ).attr("id");
 		console.log("The destination BART abbreviation is: " + dest);
-
-		departStart = $("#departStart-input").val().trim();
-		departEnd = $("#departEnd-input").val().trim();
 		travelMode = $(".travelMode-selection").val().trim();
 		//dayOfWeek = $("#myselect").val();
 
@@ -162,8 +156,6 @@ function addSaveTripClickListener() {
 				destinationCoordinates: destinationCoordinates,
 				destinationName: destinationName,
 				dest: dest,
-				departStart: departStart,
-				departEnd: departEnd,
 				travelMode: travelMode,
 				dateAdded: firebase.database.ServerValue.TIMESTAMP
 			});
@@ -176,7 +168,7 @@ function addSaveTripClickListener() {
 				  "<th class='trip-id'>" + editUniqueId + "</th>" + //maybe add id/class based on snapshot.getkey
 		          "<th>" + tripName + "</th>" +
 		          "<th>" + originName + "</th>" +
-		          "<th>" + departStart + "</th>" +
+		          "<th>" + destinationName + "</th>" +
 		        "</tr>"
 			);
 			// needed for edit ubtton //
@@ -193,8 +185,6 @@ function addSaveTripClickListener() {
 				destinationCoordinates: destinationCoordinates,
 				destinationName: destinationName,
 				dest: dest,
-				departStart: departStart,
-				departEnd: departEnd,
 				travelMode: travelMode,
 				dateAdded: firebase.database.ServerValue.TIMESTAMP
 			});
@@ -202,32 +192,14 @@ function addSaveTripClickListener() {
 
 		// navigate to phase 3 //
 		showSection(phase3a);
-		$(".walking-distance").empty();
-		$(".walking-estimate").empty();
-		$(".driving-distance").empty();
-		$(".driving-estimate").empty();
-		//$(".etd").empty();
 
 		//Bart API call.
         nextTrainAjax(orig, dest);
 
-        // Loop through the array of ETD objects (which is already sorted by earliest time) and cross match with the Train array (newTrainHeadStnArray), and print out its associated ETA
-        for (var i = 0; i < newEtdArray.length; i++) {
-        	console.log("New Train Head Stn Array i: " + newTrainHeadStnArray[i]);
-        	if (newTrainHeadStnArray.indexOf(newEtdArray[i].abbreviation) !== -1 ) {
-        		trainHeadStn = newEtdArray[i].abbreviation;
-        		eta = newEtdArray[i].estimate[0].minutes;
-        		if (eta === "Leaving") {
-        			eta = "0";
-        		}
-        		// Debug
-        		console.log("THIS IS THE ETA: " + eta);
-        		$("#eta").text(eta);
-        		break;
-        	}
-        }
-
-		//getUserLocation();
+        // Loop through the array of ETD objects
+        //(which is already sorted by earliest time) and cross match with the Train array (newTrainHeadStnArray),
+        // and print out its associated ETA
+        getNextArrivalTimeEstimate();
 	});
 }
 
@@ -243,7 +215,7 @@ database.ref().on("child_added", function(snapshot) {
 						  "<th class='trip-id'>" + snapshot.getKey() + "</th>" + //maybe add id/class based on snapshot.getkey
 	                      "<th>" + snapshot.val().tripName + "</th>" +
 	                      "<th>" + snapshot.val().originName + "</th>" +
-	                      "<th>" + snapshot.val().departStart + "</th>" +
+	                      "<th>" + snapshot.val().destinationName + "</th>" +
 	                    "</tr>");
 
 	// Listens for trip click event.
@@ -294,6 +266,38 @@ $(".listView").on("click", function() {
 });
 
 
+function getNextArrivalTimeEstimate() {
+	for (var i = 0; i < newEtdArray.length; i++) {
+		console.log("New Train Head Stn Array i: " + newTrainHeadStnArray[i]);
+		if (newTrainHeadStnArray.indexOf(newEtdArray[i].abbreviation) !== -1 ) {
+			trainHeadStn = newEtdArray[i].abbreviation;
+			eta = newEtdArray[i].estimate[0].minutes;
+			if (eta === "Leaving") {
+				eta = "0";
+			}
+			// Debug
+			console.log("THIS IS THE ETA: " + eta);
+			$("#eta").text(eta + " minutes");
+			$(".headStation").text(trainHeadStn + " at: ");
+			$("#destination-arrival-time-1").text(militaryETA);
+			var nextEta = newEtdArray[i].estimate[1].minutes;
+			var thirdEta = newEtdArray[i].estimate[2].minutes;
+
+			var nextEtaTime = determineNextArrivalTrain(militaryETA, nextEta);
+			console.log("Military time for next trains is working: " + nextEtaTime);
+			$("#etd-second").text(nextEtaTime);
+
+			$("#two-train-arrival-time-min").text(nextEta + " minutes");
+			$("#three-train-arrival-time-min").text(thirdEta + " minutes");
+			var thirdEtaTime = determineNextArrivalTrain(militaryETA, thirdEta);
+			$("#etd-third").text(thirdEtaTime);
+
+			console.log("We are getting next train time! " + nextEta);
+			break;
+		}
+	}
+}
+
 ///////////////////////////////////
 
 //// Maps API integration ///
@@ -301,9 +305,34 @@ $(".listView").on("click", function() {
 function initMap() {
 	//addSaveTripClickListener();
 	//addTripClickListener();
-	getUserLocation();
+	var directionsService = new google.maps.DirectionsService;
+
+	var userOrigin = getUserLocation();
+    calculateRoute(directionsService, userOrigin);
+
+    if (travelMode === "WALKING") {
+    	alternativeTravelMode = "DRIVING";
+    } else {
+    	alternativeTravelMode = "WALKING";
+    }
+    calculateAlternativeRoute(directionsService, userOrigin, alternativeTravelMode);
+
+    var onChangeHandler = function() {
+        userOrigin = getUserLocation();
+        calculateAndDisplayRoute(directionsService, userOrigin);
+
+        if (travelMode === "WALKING") {
+    		alternativeTravelMode = "DRIVING";
+    	} else {
+    		alternativeTravelMode = "WALKING";
+    	}
+    	calculateAlternativeRoute(directionsService, userOrigin, alternativeTravelMode);
+    };
+
+    $("#save").on("click", onChangeHandler);
+    $("#trips").on("click", "clickable-row", onChangeHandler);
 }
-//initMap();
+
 addTripClickListener();
 
 function getUserLocation() {
@@ -316,16 +345,9 @@ function getUserLocation() {
     		console.log("Postion is " + pos.lat + "," + pos.lng);
     		var latitude = pos.lat.toString();
     		var longitude = pos.lng.toString();
-    		var userOrigin = (latitude + "," + longitude);
-    		console.log(userOrigin); 
-    		var directionsService = new google.maps.DirectionsService;
-    		calculateRoute(directionsService, userOrigin);
-    		if (travelMode === "WALKING") {
-    			alternativeTravelMode = "DRIVING";
-    		} else {
-    			alternativeTravelMode = "WALKING";
-    		}
-    		calculateAlternativeRoute(directionsService, userOrigin, alternativeTravelMode);
+    		var currentUserOrigin = (latitude + "," + longitude);
+    		console.log(currentUserOrigin);  
+    		return currentUserOrigin;  		
   		})
 	} else {
   	console.log("Error: things aren't working.");
@@ -464,7 +486,7 @@ function nextTrainAjax(orig, dest) {
 	  xmlObjSchd.schedule.request.push(trip);
 	}
 	// Debug
-	// console.log(xmlObjSchd);
+	console.log(xmlObjSchd);
 
 	// Store all of request objects from schedule API response
 	var newRequestArray = xmlObjSchd.schedule.request;
@@ -548,11 +570,53 @@ function nextTrainAjax(orig, dest) {
 		}
 
 		// Debugging 
-		//console.log(xmlObjRealTime);
+		console.log(xmlObjRealTime);
 
 		// Store all of etd objects from real time API reponse into the global variable newEtdArray
 	    newEtdArray = xmlObjRealTime.station.etd;
+
+	    militaryETA = xmlObjRealTime.time;
+	    console.log("This is the time we need: " + militaryETA);
 	});
 	// END OF 2ND AJAX FUNCTION
-
 }
+
+// Crazy time stuff to get schedule to update for second and third trains!
+// Reusing code from train scheduler assignment.
+// Convert first train tim minutes using moment.js.
+function determineNextArrivalTrain(militaryETA, nextEta) {
+
+  var firstTrainTime = moment(militaryETA, "hh:mm");
+  firstTrainHours = firstTrainTime.hours();
+  firstTrainMin = firstTrainTime.minutes();
+
+  // Calculation to add up the minutes.
+  var firstTrainTotalMin = firstTrainMin + firstTrainHours*60;
+
+  var nextTrainTotalMin = parseInt(nextEta) + firstTrainTotalMin;
+
+  var nextArrivalHours = Math.floor(nextTrainTotalMin / 60);
+  var ampm = "";
+
+  // Also figure out if time is AM or PM.
+  if (nextArrivalHours >= 12) {
+    nextArrivalHours = nextArrivalHours - 12;
+    ampm = "PM";
+  } else {
+    nextArrivalHours = nextArrivalHours;
+    ampm = "AM";
+  }
+  var nextArrivalMin = nextTrainTotalMin % 60;
+  if (nextArrivalHours < 10) {
+    nextArrivalHours = "0" + nextArrivalHours;
+  }
+  if (nextArrivalMin < 10) {
+    nextArrivalMin = "0" + nextArrivalMin;
+  }
+
+  var nextArrival = nextArrivalHours + ":" + nextArrivalMin + " " + ampm;
+
+  return nextArrival;
+}
+
+
