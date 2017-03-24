@@ -2,15 +2,26 @@
 * {
   box-sizing: border-box;
 }
-
-.clickable-row:hover {
-	background-color: red;
-}
-
 .btn {
 	background-color: green;
 }
+.main-container{
+}
+header{
+	background: #428bca;
+	text-align: center;
+	font-size: 50px;
+	color: white;
 
+
+}
+.col-lg-12{
+	margin-top: 30px;
+}
+body{
+	background-color: gray;
+	padding: 10px;
+}
 /* 
   These rules take effect when the browser's width
   is 641px or more.
