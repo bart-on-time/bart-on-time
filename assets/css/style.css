@@ -2,10 +2,9 @@
 * {
   box-sizing: border-box;
 }
-.btn {
-	background-color: green;
-}
-.main-container{
+.header-container{
+	margin-right: 15px;
+	margin-left: 15px;
 }
 header{
 	background: #428bca;
