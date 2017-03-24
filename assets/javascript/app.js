@@ -68,7 +68,6 @@ function showSection(section) {
 // will be loaded on page load 
 $(document).ready(function() {
 	showSection(phase1);
-	initMap();
 	nextTrainAjax(orig, dest);
 	// Loop through the array of ETD objects
     //(which is already sorted by earliest time) and cross match with the Train array (newTrainHeadStnArray),
@@ -88,7 +87,6 @@ function addTripClickListener() {
 
         // show relevant data related to clicked trip. displayed in phase 3
         database.ref("" + tripId + "").on("value", function(snapshot) { 
-        	console.log(snapshot.val());
         	console.log(snapshot.val().tripName);
         	// the below code will return anything saved in firebase to phase 3
         	$(".trip-name").text(snapshot.val().tripName);
@@ -103,8 +101,6 @@ function addTripClickListener() {
         	// and print out its associated ETA
         	getNextArrivalTimeEstimate();
         });
-
-        //getUserLocation();
     });
 };
 
@@ -204,9 +200,6 @@ function addSaveTripClickListener() {
         //(which is already sorted by earliest time) and cross match with the Train array (newTrainHeadStnArray),
         // and print out its associated ETA
         getNextArrivalTimeEstimate();
-    	
-
-		//getUserLocation();
 	});
 }
 
@@ -312,9 +305,34 @@ function getNextArrivalTimeEstimate() {
 function initMap() {
 	//addSaveTripClickListener();
 	//addTripClickListener();
-	getUserLocation();
+	var directionsService = new google.maps.DirectionsService;
+
+	var userOrigin = getUserLocation();
+    calculateRoute(directionsService, userOrigin);
+
+    if (travelMode === "WALKING") {
+    	alternativeTravelMode = "DRIVING";
+    } else {
+    	alternativeTravelMode = "WALKING";
+    }
+    calculateAlternativeRoute(directionsService, userOrigin, alternativeTravelMode);
+
+    var onChangeHandler = function() {
+        userOrigin = getUserLocation();
+        calculateAndDisplayRoute(directionsService, userOrigin);
+
+        if (travelMode === "WALKING") {
+    		alternativeTravelMode = "DRIVING";
+    	} else {
+    		alternativeTravelMode = "WALKING";
+    	}
+    	calculateAlternativeRoute(directionsService, userOrigin, alternativeTravelMode);
+    };
+
+    $("#save").on("click", onChangeHandler);
+    $("#trips").on("click", "clickable-row", onChangeHandler);
 }
-//initMap();
+
 addTripClickListener();
 
 function getUserLocation() {
@@ -327,16 +345,9 @@ function getUserLocation() {
     		console.log("Postion is " + pos.lat + "," + pos.lng);
     		var latitude = pos.lat.toString();
     		var longitude = pos.lng.toString();
-    		var userOrigin = (latitude + "," + longitude);
-    		console.log(userOrigin); 
-    		var directionsService = new google.maps.DirectionsService;
-    		calculateRoute(directionsService, userOrigin);
-    		if (travelMode === "WALKING") {
-    			alternativeTravelMode = "DRIVING";
-    		} else {
-    			alternativeTravelMode = "WALKING";
-    		}
-    		calculateAlternativeRoute(directionsService, userOrigin, alternativeTravelMode);
+    		var currentUserOrigin = (latitude + "," + longitude);
+    		console.log(currentUserOrigin);  
+    		return currentUserOrigin;  		
   		})
 	} else {
   	console.log("Error: things aren't working.");
