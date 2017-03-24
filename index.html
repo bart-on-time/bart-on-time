@@ -36,7 +36,7 @@
             <table class="table">
               <thead>
                 <tr class="table-head">
-                  <th class='trip-id'>Trip Key</th>
+                  <th class='trip-id'>Key (will remove)</th>
                   <th>Trip Name</th>
                   <th>Next Train To:</th>
                   <th>Arrives At:</th>
@@ -56,16 +56,18 @@
           <input class="tripName-input" id="tripName-input" type="text">
         </div>
         <select id="origin-station">
-          <option class="origin-selection" value="37.79326600000003,-122.39659">Embarcadero Station</option>
-          <option class="origin-selection" value="37.789641000000024,-122.40095599999995">Montgomery Station</option>
-          <option class="origin-selection" value="37.784507,-122.40772099999998">Powell Station</option>
-          <option class="origin-selection" value="37.77989899999997,-122.41356300000007">Civic Center Station</option>
+          <option id="EMBR" class="origin-selection" value="37.79326600000003,-122.39659">Embarcadero Station</option>
+          <option id="MONT" class="origin-selection" value="37.789641000000024,-122.40095599999995">Montgomery Station</option>
+          <option id="POWL" class="origin-selection" value="37.784507,-122.40772099999998">Powell Station</option>
+          <option id="CIVC" class="origin-selection" value="37.77989899999997,-122.41356300000007">Civic Center Station</option>
+          <option id="WOAK" class="origin-selection" value="37.80467476,-122.2945822">West Oakland Station</option>
         </select>
         <select id="destination-station">
-          <option class="destination-selection" value="37.79326600000003,-122.39659">Embarcadero Station</option>
-          <option class="destination-selection" value="37.789641000000024,-122.40095599999995">Montgomery Station</option>
-          <option class="destination-selection" value="37.784507,-122.40772099999998">Powell Station</option>
-          <option class="destination-selection" value="37.77989899999997,-122.41356300000007">Civic Center Station</option>
+          <option id="EMBR" class="destination-selection" value="37.79326600000003,-122.39659">Embarcadero Station</option>
+          <option id="MONT" class="destination-selection" value="37.789641000000024,-122.40095599999995">Montgomery Station</option>
+          <option id="POWL" class="destination-selection" value="37.784507,-122.40772099999998">Powell Station</option>
+          <option id="CIVC" class="destination-selection" value="37.77989899999997,-122.41356300000007">Civic Center Station</option>
+          <option id="WOAK" class="origin-selection" value="37.80467476,-122.2945822">West Oakland Station</option>
         </select>
         <div class="depart-start-time">
           <label for="departStart-input">Between</label>
@@ -91,15 +93,15 @@
         <div class="view-trip">Now on <span class="trip-name"></span></div>
         <div class="simple">Start Your Trip (<span class="travel-mode">WALKING</span>) In:</div>
         <div class="leave-time-min">12 MINUTES</div>
-        <div>Your Next Train To <span class="selected-origin-station"></span></div>
-        <div>Will Arrive In: <span class="arrival-time-min">19 MIN</span></div>
-        <div>Arrive at Destination: <span class="selected-destination-station"></span><span class="destination-arrival-time-1">5:29 PM</span></div>
+        <div>Your Next Train From <span id="selected-origin-station"></span></div>
+        <div>Will Arrive In: <span class="etd"></span></div>
+        <div>Train to Take: <span class="headStation"></span><span class="destination-arrival-time-1">5:29 PM</span></div>
         <div>AVG DIST/WALKING TIME TO STATION: <span class="walking-distance"></span><span class="walking-estimate"></span></div>
         <div>AVG DIST/DRIVING TIME TO STATION: <span class="driving-distance"></span><span class="driving-estimate"></span></div>
         <div>2nd Train Arrives In: <span class="two-train-arrival-time-min">19 MIN</span></div>
-        <div>Arrive at Destination: <span class="selected-destination-station"></span><span class="destination-arrival-time-1">5:49 PM</span></div>
+        <div>Train to Take: <span class="headStation"></span><span class="etd-second">5:49 PM</span></div>
         <div>3rd Train Arrives In: <span class="three-train-arrival-time-min">19 MIN</span></div>
-        <div>Arrive at Destination: <span class="selected-destination-station"></span><span class="destination-arrival-time-1">7:09 PM</span></div>
+        <div>Train to Take: <span class="headStation"></span><span class="etd-third">7:09 PM</span></div>
         <button class="edit btn btn-primary">Edit</button>
         <button class="listView btn btn-primary">View Trips</button>
       </section>

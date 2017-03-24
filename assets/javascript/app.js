@@ -1,23 +1,21 @@
 
 // Initialize Firebase
-// var config = {
-// 	apiKey: "AIzaSyCNU5CN43KJZiTfFgMCIpWPMLBIiVUQ8Fo",
-// 	authDomain: "bart-on-time.firebaseapp.com",
-// 	databaseURL: "https://bart-on-time.firebaseio.com",
-// 	storageBucket: "bart-on-time.appspot.com",
-// 	messagingSenderId: "258285045447"
-// };
-// firebase.initializeApp(config);
-// var database = firebase.database();
+ var config = {
+ 	apiKey: "AIzaSyCNU5CN43KJZiTfFgMCIpWPMLBIiVUQ8Fo",
+ 	authDomain: "bart-on-time.firebaseapp.com",
+ 	databaseURL: "https://bart-on-time.firebaseio.com",
+ 	storageBucket: "bart-on-time.appspot.com",
+ 	messagingSenderId: "258285045447"
+ };
 
-//// meggin's fire base api ////
-var config = {
-	apiKey: "AIzaSyCNU5CN43KJZiTfFgMCIpWPMLBIiVUQ8Fo",
-	authDomain: "bart-on-time.firebaseapp.com",
-	databaseURL: "https://bart-on-time.firebaseio.com",
-	storageBucket: "bart-on-time.appspot.com",
-	messagingSenderId: "258285045447"
-};
+//var config = {
+	//apiKey: "AIzaSyBS6nowOI7CgfhnS-hM3A5BUxh58k7NdVo",
+    //authDomain: "test-d1af2.firebaseapp.com",
+    //databaseURL: "https://test-d1af2.firebaseio.com",
+    //storageBucket: "test-d1af2.appspot.com",
+    //messagingSenderId: "395340255814"
+//};
+
 firebase.initializeApp(config);
 var database = firebase.database();
 /////////////////////////////////
@@ -41,6 +39,36 @@ var editUniqueId;
 var editStauts = false;
 /////////////////////////////////
 
+// Declare global variables
+var apiKeyBart = "ZPZZ-PTE2-9NWT-DWE9"
+var orig = "EMBR";
+var dest = "WOAK";
+
+// Data object for Real Time Train ETA
+var xmlObjRealTime = {
+  uri: null,
+  date: null,
+  time: null,
+  station: {
+    name: null,
+    abbr: null,
+    etd: []
+  }
+}
+// Data object for scheduled departure time object
+var xmlObjSchd = {
+  uri: null,
+  origin: null,
+  destination: null,
+  schedule: {
+    date: null,
+    time: null,
+    before: null,
+    after: null,
+    request: []
+  }
+}
+
 //// phase controller ////
 function showSection(section) {
 	phase1.css({'display': 'none'});
@@ -58,8 +86,9 @@ function showSection(section) {
 // will be loaded on page load 
 $(document).ready(function() {
 	showSection(phase1);
+	initMap();
 	// Listens for trip click event.
-	addTripClickListener();
+	//addTripClickListener();
 });
 
 // Fires when trip selected.
@@ -72,26 +101,35 @@ function addTripClickListener() {
 		$(".walking-estimate").empty();
 		$(".driving-distance").empty();
 		$(".driving-estimate").empty();
+		$(".etd").empty();
 
         // show relevant data related to clicked trip. displayed in phase 3
+        //TODO: Add to firebase the orig and dest codes for Bart API.
+		//TODO: Make sure to have these codes pulled up at all times needed when retrieving data.
         database.ref("" + tripId + "").on("value", function(snapshot) { 
         	console.log(snapshot.val());
         	console.log(snapshot.val().tripName);
         	// the below code will return anything saved in firebase to phase 3
         	$(".trip-name").text(snapshot.val().tripName);
         	$(".selected-origin-station").text(snapshot.val().originName + " ");
-        	$(".selected-destination-station").text(snapshot.val().destinationName + " ");
+        	$(".headStation").text(snapshot.val().destinationName + " ");
+        	orig = snapshot.val().orig;
+        	console.log("This is the orig we need for ajax!: " + orig);
+        	dest = snapshot.val().dest;
+        	console.log("This is the dest we need for ajax!: " + dest);
         });
 
-        getUserLocation();
+        //getUserLocation();
     });
 };
 
 // new trip move to phase 2
 $("#new").on("click", function() {
 	showSection(phase2);
-	addSaveTripClickListener();
+	//addSaveTripClickListener();
 });
+
+addSaveTripClickListener();
 
 /////////////////////////////////
 
@@ -106,9 +144,13 @@ function addSaveTripClickListener() {
 		console.log(tripName);
 		originCoordinates = $("#origin-station option:selected").val().trim();
 		originName = $("#origin-station option:selected").html().trim();
+		orig = $("#origin-station option:selected" ).attr("id");
+		console.log("The origin BART abbreviation is: " + orig);
 		console.log(originName);
 		destinationCoordinates = $("#destination-station option:selected").val().trim();
 		destinationName = $("#destination-station option:selected").html().trim();
+		dest = $("#destination-station option:selected" ).attr("id");
+		console.log("The destination BART abbreviation is: " + dest);
 
 		departStart = $("#departStart-input").val().trim();
 		departEnd = $("#departEnd-input").val().trim();
@@ -126,12 +168,16 @@ function addSaveTripClickListener() {
 			//database.ref("-KfuTowI1RAjwSmgOBtz").update({ tripName: 'yo'});
 
 			//database.ref("-KfuTowI1RAjwSmgOBtz").update({
+			//TODO: Add to firebase the orig and dest codes for Bart API.
+			//TODO: Make sure to have these codes pulled up at all times needed when retrieving data.
 			database.ref("" + editUniqueId + "").update({
 				tripName: tripName,
 				originCoordinates: originCoordinates,
 				originName: originName,
+				orig: orig,
 				destinationCoordinates: destinationCoordinates,
 				destinationName: destinationName,
+				dest: dest,
 				departStart: departStart,
 				departEnd: departEnd,
 				travelMode: travelMode,
@@ -142,17 +188,27 @@ function addSaveTripClickListener() {
 			// html like row 161
 			// need to know id/class of element being updated. maybe based on snapshot.key
 			// will finish tomorrow
-
+			$("#" + editUniqueId).html(
+				  "<th class='trip-id'>" + editUniqueId + "</th>" + //maybe add id/class based on snapshot.getkey
+		          "<th>" + tripName + "</th>" +
+		          "<th>" + originName + "</th>" +
+		          "<th>" + departStart + "</th>" +
+		        "</tr>"
+			);
 			// needed for edit ubtton //
 			editStauts = false;
 		}
 		else { // new record
+			//TODO: Add to firebase the orig and dest codes for Bart API.
+			//TODO: Make sure to have these codes pulled up at all times needed when retrieving data.
 			database.ref().push({
 				tripName: tripName,
 				originCoordinates: originCoordinates,
 				originName: originName,
+				orig: orig,
 				destinationCoordinates: destinationCoordinates,
 				destinationName: destinationName,
+				dest: dest,
 				departStart: departStart,
 				departEnd: departEnd,
 				travelMode: travelMode,
@@ -166,8 +222,46 @@ function addSaveTripClickListener() {
 		$(".walking-estimate").empty();
 		$(".driving-distance").empty();
 		$(".driving-estimate").empty();
+		$(".etd").empty();
 
-		getUserLocation();
+		//Bart API call.
+        nextTrainAjax(orig, dest);
+
+        // Store all of request objects from schedule API response and convert to list of 
+        var newRequestArray = xmlObjSchd.schedule.request;
+
+        // Loop through the schedule request object to find all trains whose directions are towards our destination
+        var newTrainHeadStnArray = [];
+        for (var i = 0; i < newRequestArray.length; i++) {
+          var newTrainHeadStn = newRequestArray[i].legs[0].trainHeadStation;
+          newTrainHeadStnArray.push(newTrainHeadStn);
+        }
+        console.log(newTrainHeadStnArray);
+
+        // ETA variable
+        var eta = "";
+
+        // Store all of etd objects from real time API reponse
+        var newEtdArray = xmlObjRealTime.station.etd;
+
+        // Loop through the array of ETD objects (which is already sorted by earliest time) and cross match with the Train array (newTrainHeadStnArray), and print out its associated ETA
+        for (var i = 0; i < newEtdArray.length; i++) {
+          if (newTrainHeadStnArray.indexOf(newEtdArray[i].abbreviation) !== -1 ) {
+            var trainHeadStn = newEtdArray[i].abbreviation;
+            $('.headStation').html(trainHeadStn + " direction train");
+
+            eta = newEtdArray[i].estimate[0].minutes;
+            $('#etd').html("next train arrives in: " + eta + " mins");
+            if (eta === "Leaving") {
+              eta = "0";
+            }
+            // Debug
+            console.log("THIS IS THE ETA: " + eta);
+            return;
+          }
+        }
+
+		//getUserLocation();
 	});
 }
 
@@ -175,8 +269,11 @@ function addSaveTripClickListener() {
 database.ref().on("child_added", function(snapshot) {
 // Change the HTML to reflect
 	console.log("child: " + snapshot.val().tripName );
+
+	//TODO: Add to firebase the orig and dest codes for Bart API.
+	//TODO: Make sure to have these codes pulled up at all times needed when retrieving data.
 	// Build up train table in DOM.
-	$("#trips").append("<tr class='clickable-row'>" +
+	$("#trips").append("<tr class='clickable-row'" + "id='" + snapshot.getKey() + "'>" +
 						  "<th class='trip-id'>" + snapshot.getKey() + "</th>" + //maybe add id/class based on snapshot.getkey
 	                      "<th>" + snapshot.val().tripName + "</th>" +
 	                      "<th>" + snapshot.val().originName + "</th>" +
@@ -190,12 +287,13 @@ database.ref().on("child_added", function(snapshot) {
 // only want to returns the data just saved. displayed in phase 3
 database.ref().orderByChild("dateAdded").limitToLast(1).on("child_added", function(snapshot) {
 	// the below code will return anything saved in firebase to phase 3
+	//TODO: Add to firebase the orig and dest codes for Bart API.
+	//TODO: Make sure to have these codes pulled up at all times needed when retrieving data.
 	editUniqueId = snapshot.getKey();
 	originCoordinates = snapshot.val().originCoordinates;
 	console.log("These are origin coordinates accessible to view page: " + originCoordinates);
 	travelMode = snapshot.val().travelMode;
 	console.log("This is travel mode accessible to view page: " + travelMode);
-	console.log("This is the alternative travel mode accessible to view page: " + alternativeTravelMode);
 	console.log("editUniqueId " + editUniqueId);
 	$(".trip-name").text(snapshot.val().tripName);
 	$(".selected-origin-station").text(snapshot.val().originName);
@@ -222,7 +320,7 @@ $("#cancel").on("click", function() {
 $(".edit").on("click", function() {
 	editStauts = true;
 	showSection(phase2);
-	addSaveTripClickListener();
+	//addSaveTripClickListener();
 });
 // view trips: navigate to phase 1
 $(".listView").on("click", function() {
@@ -235,9 +333,12 @@ $(".listView").on("click", function() {
 //// Maps API integration ///
 
 function initMap() {
-	addSaveTripClickListener();
-	addTripClickListener();
+	//addSaveTripClickListener();
+	//addTripClickListener();
+	getUserLocation();
 }
+//initMap();
+addTripClickListener();
 
 function getUserLocation() {
 	if (navigator.geolocation) {
@@ -311,3 +412,142 @@ function calculateAlternativeRoute(directionsService, userOrigin, alternativeTra
   		}
 	});
 } 
+
+// AJAX FUNCTIONS 
+function nextTrainAjax(orig, dest) {
+  // First AJAX function - Real Time Train ETA
+  $.ajax({
+    type: "GET",
+    url: "http://api.bart.gov/api/etd.aspx?cmd=etd&orig=" + orig + "&key=" + apiKeyBart,
+    dataType: "text"
+    //async: false,
+    //contentType: "text/xml; charset=\"utf-8\""
+  }).done(function(response) {
+    // For debugging API call
+    console.log(response);
+    // Use .parseXML() functino (core jQuery)
+    var xmlRaw = $.parseXML(response)
+    // This is the entire XML doc needed
+    var xml = xmlRaw.childNodes[0]
+
+    // Mapping relevant object properties to XML elements
+    xmlObjRealTime.uri = xml.getElementsByTagName("uri")[0].innerHTML;
+    xmlObjRealTime.date = xml.getElementsByTagName("date")[0].innerHTML;
+    xmlObjRealTime.time = xml.getElementsByTagName("time")[0].innerHTML;
+    // Mapping to certain XML elements selected by children index (also can use getElementsByTagName("name"), etc)
+    xmlObjRealTime.station.name = xml.children[3].children[0].innerHTML;
+    xmlObjRealTime.station.abbr = xml.children[3].children[1].innerHTML;
+
+    // Loop through multiple <etd> XML elements, where etd stands for "Estimated Time of Departure"
+    var etdArray = xml.getElementsByTagName("etd");
+    for (var i = 0; i < etdArray.length; i++) {
+
+      // Create an empty variable object to hold properties in between loops
+      var etdChild = {
+        destination: null,
+        abbreviation: null,
+        limited: null,
+        estimate: []
+      };
+
+      // Assign element innerHTML to empty object properties
+      etdChild.destination = etdArray[i].getElementsByTagName("destination")[0].innerHTML;
+      etdChild.abbreviation = etdArray[i].getElementsByTagName("abbreviation")[0].innerHTML;
+      etdChild.limited = etdArray[i].getElementsByTagName("limited")[0].innerHTML;
+      
+      // Loop through multiple <estimate> XML elements within an <etd> tag
+      var estimateRaw = etdArray[i].getElementsByTagName("estimate");
+      for (var j = 0; j < estimateRaw.length; j++) {
+
+        // Create another empty variable object to hold properties in between the loops within the loop
+        var estimateChild = {
+          minutes: null,
+          platform: null,
+          direction: null,
+          trainLength: null,
+          hexcolor: null
+        };
+
+        // Assign element innerHTML to empty object properties
+        estimateChild.minutes = estimateRaw[j].getElementsByTagName("minutes")[0].innerHTML;
+        estimateChild.platform = estimateRaw[j].getElementsByTagName("platform")[0].innerHTML;
+        estimateChild.direction = estimateRaw[j].getElementsByTagName("direction")[0].innerHTML;
+        estimateChild.trainLength = estimateRaw[j].getElementsByTagName("length")[0].innerHTML;
+        estimateChild.hexcolor = estimateRaw[j].getElementsByTagName("hexcolor")[0].innerHTML;
+
+        // Push the resulting object to esdChild.estimate array declared outside of the current loop
+        etdChild.estimate.push(estimateChild);
+      }
+
+      // Push the resulting object to xmlObjRealTime.station.etd array declared globally
+      xmlObjRealTime.station.etd.push(etdChild);
+    }
+
+    // Debugging 
+    //console.log(xmlObjRealTime);
+  });
+  // END OF 2ND AJAX FUNCTION
+
+
+  // Second AJAX Fucntion - Departure Time Schedule
+  $.ajax({
+    type: "GET",
+    url: "http://api.bart.gov/api/sched.aspx?cmd=arrive&orig=" + orig + "&dest=" + dest + "&date=now&key=" + apiKeyBart + "&b=0&a=3&l=1",
+    dataType: "text"
+    //async: false,
+    //contentType: "text/xml; charset=\"utf-8\""
+  }).done(function(response) {
+    // For debugging API call
+    //console.log(response);
+
+    // Use .parseXML() functino (core jQuery)
+    var xmlRaw = $.parseXML(response)
+    // This is the entire XML doc needed
+    var xml = xmlRaw.childNodes[0]
+
+    // Mapping relevant object properties to XML elements
+    xmlObjSchd.uri = xml.getElementsByTagName("uri")[0].innerHTML;
+    xmlObjSchd.origin = xml.getElementsByTagName("origin")[0].innerHTML;
+    xmlObjSchd.destination = xml.getElementsByTagName("destination")[0].innerHTML;
+    xmlObjSchd.schedule.date = xml.getElementsByTagName("date")[0].innerHTML;
+    xmlObjSchd.schedule.time = xml.getElementsByTagName("time")[0].innerHTML;
+    xmlObjSchd.schedule.before = xml.getElementsByTagName("before")[0].innerHTML;
+    xmlObjSchd.schedule.after = xml.getElementsByTagName("after")[0].innerHTML;
+
+    var tripsRaw = xml.getElementsByTagName("request")[0].getElementsByTagName("trip");
+    //console.log(requestRaw)
+    for (var i = 0; i < tripsRaw.length; i++) {
+      //console.log(tripsRaw[i]);
+      var trip = {
+        origin: tripsRaw[i].getAttribute("origin"),
+        destination: tripsRaw[i].getAttribute("destination"),
+        origTimeMin: tripsRaw[i].getAttribute("origTimeMin"),
+        origTimeDate: tripsRaw[i].getAttribute("origTimeDate"),
+        destTimeMin: tripsRaw[i].getAttribute("destTimeMin"),
+        destTimeDate: tripsRaw[i].getAttribute("destTimeDate"),
+        tripTime: tripsRaw[i].getAttribute("tripTime"),
+        legs: []
+      }
+
+      var legsRaw = tripsRaw[i].getElementsByTagName("leg");
+      for (var j = 0; j < legsRaw.length; j++) {
+        var leg = {
+          order: legsRaw[j].getAttribute("order"),
+          origin: legsRaw[j].getAttribute("origin"),
+          destination: legsRaw[j].getAttribute("destination"),
+          origTimeMin: legsRaw[j].getAttribute("origTimeMin"),
+          origTimeDate: legsRaw[j].getAttribute("origTimeDate"),
+          destTimeMin: legsRaw[j].getAttribute("destTimeMin"),
+          destTimeDate: legsRaw[j].getAttribute("destTimeDate"),
+          trainHeadStation: legsRaw[j].getAttribute("trainHeadStation")
+        }
+        trip.legs.push(leg)
+      }
+      xmlObjSchd.schedule.request.push(trip);
+    }
+    // Debug
+    console.log(xmlObjSchd);
+  });
+  // END OF 2ND AJAX FUNCTION
+
+}
