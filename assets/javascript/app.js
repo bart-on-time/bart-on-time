@@ -1,23 +1,21 @@
 
 // Initialize Firebase
-// var config = {
-// 	apiKey: "AIzaSyCNU5CN43KJZiTfFgMCIpWPMLBIiVUQ8Fo",
-// 	authDomain: "bart-on-time.firebaseapp.com",
-// 	databaseURL: "https://bart-on-time.firebaseio.com",
-// 	storageBucket: "bart-on-time.appspot.com",
-// 	messagingSenderId: "258285045447"
-// };
-// firebase.initializeApp(config);
-// var database = firebase.database();
+ var config = {
+ 	apiKey: "AIzaSyCNU5CN43KJZiTfFgMCIpWPMLBIiVUQ8Fo",
+ 	authDomain: "bart-on-time.firebaseapp.com",
+ 	databaseURL: "https://bart-on-time.firebaseio.com",
+ 	storageBucket: "bart-on-time.appspot.com",
+ 	messagingSenderId: "258285045447"
+ };
 
-//// meggin's fire base api ////
-var config = {
-	apiKey: "AIzaSyBS6nowOI7CgfhnS-hM3A5BUxh58k7NdVo",
-    authDomain: "test-d1af2.firebaseapp.com",
-    databaseURL: "https://test-d1af2.firebaseio.com",
-    storageBucket: "test-d1af2.appspot.com",
-    messagingSenderId: "395340255814"
-};
+//var config = {
+	//apiKey: "AIzaSyBS6nowOI7CgfhnS-hM3A5BUxh58k7NdVo",
+    //authDomain: "test-d1af2.firebaseapp.com",
+    //databaseURL: "https://test-d1af2.firebaseio.com",
+    //storageBucket: "test-d1af2.appspot.com",
+    //messagingSenderId: "395340255814"
+//};
+
 firebase.initializeApp(config);
 var database = firebase.database();
 /////////////////////////////////
@@ -88,6 +86,7 @@ function showSection(section) {
 // will be loaded on page load 
 $(document).ready(function() {
 	showSection(phase1);
+	initMap();
 	// Listens for trip click event.
 	//addTripClickListener();
 });
@@ -102,6 +101,7 @@ function addTripClickListener() {
 		$(".walking-estimate").empty();
 		$(".driving-distance").empty();
 		$(".driving-estimate").empty();
+		$(".etd").empty();
 
         // show relevant data related to clicked trip. displayed in phase 3
         //TODO: Add to firebase the orig and dest codes for Bart API.
@@ -113,13 +113,13 @@ function addTripClickListener() {
         	$(".trip-name").text(snapshot.val().tripName);
         	$(".selected-origin-station").text(snapshot.val().originName + " ");
         	$(".headStation").text(snapshot.val().destinationName + " ");
+        	orig = snapshot.val().orig;
+        	console.log("This is the orig we need for ajax!: " + orig);
+        	dest = snapshot.val().dest;
+        	console.log("This is the dest we need for ajax!: " + dest);
         });
 
         //getUserLocation();
-        initMap();
-
-        //Bart API call.
-        nextTrainAjax(orig, dest);
     });
 };
 
@@ -145,10 +145,12 @@ function addSaveTripClickListener() {
 		originCoordinates = $("#origin-station option:selected").val().trim();
 		originName = $("#origin-station option:selected").html().trim();
 		orig = $("#origin-station option:selected" ).attr("id");
+		console.log("The origin BART abbreviation is: " + orig);
 		console.log(originName);
 		destinationCoordinates = $("#destination-station option:selected").val().trim();
 		destinationName = $("#destination-station option:selected").html().trim();
 		dest = $("#destination-station option:selected" ).attr("id");
+		console.log("The destination BART abbreviation is: " + dest);
 
 		departStart = $("#departStart-input").val().trim();
 		departEnd = $("#departEnd-input").val().trim();
@@ -172,8 +174,10 @@ function addSaveTripClickListener() {
 				tripName: tripName,
 				originCoordinates: originCoordinates,
 				originName: originName,
+				orig: orig,
 				destinationCoordinates: destinationCoordinates,
 				destinationName: destinationName,
+				dest: dest,
 				departStart: departStart,
 				departEnd: departEnd,
 				travelMode: travelMode,
@@ -201,8 +205,10 @@ function addSaveTripClickListener() {
 				tripName: tripName,
 				originCoordinates: originCoordinates,
 				originName: originName,
+				orig: orig,
 				destinationCoordinates: destinationCoordinates,
 				destinationName: destinationName,
+				dest: dest,
 				departStart: departStart,
 				departEnd: departEnd,
 				travelMode: travelMode,
@@ -216,6 +222,44 @@ function addSaveTripClickListener() {
 		$(".walking-estimate").empty();
 		$(".driving-distance").empty();
 		$(".driving-estimate").empty();
+		$(".etd").empty();
+
+		//Bart API call.
+        nextTrainAjax(orig, dest);
+
+        // Store all of request objects from schedule API response and convert to list of 
+        var newRequestArray = xmlObjSchd.schedule.request;
+
+        // Loop through the schedule request object to find all trains whose directions are towards our destination
+        var newTrainHeadStnArray = [];
+        for (var i = 0; i < newRequestArray.length; i++) {
+          var newTrainHeadStn = newRequestArray[i].legs[0].trainHeadStation;
+          newTrainHeadStnArray.push(newTrainHeadStn);
+        }
+        console.log(newTrainHeadStnArray);
+
+        // ETA variable
+        var eta = "";
+
+        // Store all of etd objects from real time API reponse
+        var newEtdArray = xmlObjRealTime.station.etd;
+
+        // Loop through the array of ETD objects (which is already sorted by earliest time) and cross match with the Train array (newTrainHeadStnArray), and print out its associated ETA
+        for (var i = 0; i < newEtdArray.length; i++) {
+          if (newTrainHeadStnArray.indexOf(newEtdArray[i].abbreviation) !== -1 ) {
+            var trainHeadStn = newEtdArray[i].abbreviation;
+            $('.headStation').html(trainHeadStn + " direction train");
+
+            eta = newEtdArray[i].estimate[0].minutes;
+            $('#etd').html("next train arrives in: " + eta + " mins");
+            if (eta === "Leaving") {
+              eta = "0";
+            }
+            // Debug
+            console.log("THIS IS THE ETA: " + eta);
+            return;
+          }
+        }
 
 		//getUserLocation();
 	});
@@ -250,7 +294,6 @@ database.ref().orderByChild("dateAdded").limitToLast(1).on("child_added", functi
 	console.log("These are origin coordinates accessible to view page: " + originCoordinates);
 	travelMode = snapshot.val().travelMode;
 	console.log("This is travel mode accessible to view page: " + travelMode);
-	console.log("This is the alternative travel mode accessible to view page: " + alternativeTravelMode);
 	console.log("editUniqueId " + editUniqueId);
 	$(".trip-name").text(snapshot.val().tripName);
 	$(".selected-origin-station").text(snapshot.val().originName);
@@ -371,17 +414,17 @@ function calculateAlternativeRoute(directionsService, userOrigin, alternativeTra
 } 
 
 // AJAX FUNCTIONS 
-function nextTrainAjax(origStn, destStn) {
+function nextTrainAjax(orig, dest) {
   // First AJAX function - Real Time Train ETA
   $.ajax({
     type: "GET",
-    url: "http://api.bart.gov/api/etd.aspx?cmd=etd&orig=" + origStn + "&key=" + apiKeyBart,
+    url: "http://api.bart.gov/api/etd.aspx?cmd=etd&orig=" + orig + "&key=" + apiKeyBart,
     dataType: "text"
     //async: false,
     //contentType: "text/xml; charset=\"utf-8\""
   }).done(function(response) {
     // For debugging API call
-    //console.log(response);
+    console.log(response);
     // Use .parseXML() functino (core jQuery)
     var xmlRaw = $.parseXML(response)
     // This is the entire XML doc needed
@@ -449,7 +492,7 @@ function nextTrainAjax(origStn, destStn) {
   // Second AJAX Fucntion - Departure Time Schedule
   $.ajax({
     type: "GET",
-    url: "http://api.bart.gov/api/sched.aspx?cmd=arrive&orig=" + origStn + "&dest=" + destStn + "&date=now&key=" + apiKeyBart + "&b=0&a=3&l=1",
+    url: "http://api.bart.gov/api/sched.aspx?cmd=arrive&orig=" + orig + "&dest=" + dest + "&date=now&key=" + apiKeyBart + "&b=0&a=3&l=1",
     dataType: "text"
     //async: false,
     //contentType: "text/xml; charset=\"utf-8\""
@@ -503,7 +546,7 @@ function nextTrainAjax(origStn, destStn) {
       xmlObjSchd.schedule.request.push(trip);
     }
     // Debug
-    //console.log(xmlObjSchd);
+    console.log(xmlObjSchd);
   });
   // END OF 2ND AJAX FUNCTION
 
