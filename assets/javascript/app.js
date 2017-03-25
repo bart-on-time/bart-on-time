@@ -25,7 +25,6 @@ var authSplash = $("#authSplash");
 var phase1 = $("#phase1");
 var phase2 = $("#phase2");
 var phase3a = $("#phase3a");
-var phase3b = $("#phase3b");
 
 var tripName;
 var destination;
@@ -50,6 +49,8 @@ var newEtdArray;
 var trainHeadStn;
 var eta;
 var militaryETA;
+var leaveTime;
+var startTrip;
 
 //**Todo: experimenting with oauth-- delete this if can't get working!
 //Global ID of currently signed-in user, needed for authentication.
@@ -64,7 +65,6 @@ function showSection(section) {
 	phase1.css({'display': 'none'});
 	phase2.css({'display': 'none'});
 	phase3a.css({'display': 'none'});
-	phase3b.css({'display': 'none'});
 
 	if (section) {
 		section.css({'display' : 'block'});
@@ -118,6 +118,9 @@ $(document).ready(function() {
     //(which is already sorted by earliest time) and cross match with the Train array (newTrainHeadStnArray),
     // and print out its associated ETA
     getNextArrivalTimeEstimate();
+
+    //startYourTripEstimate();
+
 	// Listens for trip click event.
 	//addTripClickListener();
 });
@@ -145,9 +148,13 @@ function addTripClickListener() {
 			//(which is already sorted by earliest time) and cross match with the Train array (newTrainHeadStnArray),
 			// and print out its associated ETA
 			getNextArrivalTimeEstimate();
+
+			//startYourTripEstimate();
 		});
 
 		initMap();
+
+		startYourTripEstimate();
     });
 };
 
@@ -249,6 +256,8 @@ function addSaveTripClickListener() {
         getNextArrivalTimeEstimate();
 
         initMap();
+
+        startYourTripEstimate();
 	});
 }
 
@@ -398,16 +407,29 @@ function calculateRoute(directionsService) {
 			if (travelMode === "WALKING") {
 				$(".walking-distance").html(route.legs[0].distance.text + "/ ");
 				$(".walking-estimate").html(route.legs[0].duration.text);
+				$("#travel-mode").text("WALKING");
 			} else if (travelMode === "DRIVING") {
 				$(".driving-distance").html(route.legs[0].distance.text + "/ ");
 				$(".driving-estimate").html(route.legs[0].duration.text);
+				$("#travel-mode").text("DRIVING");
 			}
-			
   		} else {
     		window.alert('Directions request failed due to ' + status);
   		}
 	});
 }
+
+function startYourTripEstimate() {
+	console.log("I'm at least in leave time function but no value yet.");
+	if (travelMode === "DRIVING") {
+		leaveTime = $("#driving-estimate").val() - eta;
+		console.log("Leave time working for driving: " + leaveTime);
+	} else {
+		leaveTime = $("#walking-estimate").val() - eta;
+		console.log("Leave time working for walking: " + leaveTime);
+	}
+	$("#leave-time-min").text(leaveTime + " minutes");
+};
 
 function calculateAlternativeRoute(directionsService) {
 	console.log("Origin Coordinates being used in calculating route are : " + originCoordinates);
