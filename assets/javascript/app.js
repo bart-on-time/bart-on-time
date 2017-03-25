@@ -265,7 +265,7 @@ function addSaveTripClickListener() {
 
         initMap();
 
-        startYourTripEstimate();
+        //startYourTripEstimate();
 	});
 }
 
@@ -431,11 +431,16 @@ function calculateRoute(directionsService) {
 			console.log("What is so wrong with origin?" + route.origin);
 			if (travelMode === "WALKING") {
 				$(".walking-distance").html(route.legs[0].distance.text + "/ ");
-				$(".walking-estimate").html(route.legs[0].duration.text);
+				var walkingEstimate = $(".walking-estimate");
+				walkingEstimate.html(route.legs[0].duration.text);
+				leaveTime = parseFloat(walkingEstimate.text()) - parseFloat(eta);
 				$("#travel-mode").text("WALKING");
 			} else if (travelMode === "DRIVING") {
 				$(".driving-distance").html(route.legs[0].distance.text + "/ ");
-				$(".driving-estimate").html(route.legs[0].duration.text);
+				var drivingEstimate = $(".driving-estimate");
+				drivingEstimate.html(route.legs[0].duration.text);
+				leaveTime = parseFloat(drivingEstimate.text()) - parseFloat(eta);
+				$("#leave-time-min").text(leaveTime + " minutes");
 				$("#travel-mode").text("DRIVING");
 			}
   		} else {
@@ -444,17 +449,17 @@ function calculateRoute(directionsService) {
 	});
 }
 
-function startYourTripEstimate() {
-	console.log("I'm at least in leave time function but no value yet.");
-	if (travelMode === "DRIVING") {
-		leaveTime = $("#driving-estimate").val() - eta;
-		console.log("Leave time working for driving: " + leaveTime);
-	} else {
-		leaveTime = $("#walking-estimate").val() - eta;
-		console.log("Leave time working for walking: " + leaveTime);
-	}
-	$("#leave-time-min").text(leaveTime + " minutes");
-};
+//function startYourTripEstimate() {
+//	console.log("I'm at least in leave time function but no value yet.");
+//	if (travelMode === "DRIVING") {
+//		leaveTime = $("#driving-estimate").val() - eta;
+//		console.log("Leave time working for driving: " + leaveTime);
+//	} else {
+//		leaveTime = $("#walking-estimate").val() - eta;
+//		console.log("Leave time working for walking: " + leaveTime);
+//	}
+//	$("#leave-time-min").text(leaveTime + " minutes");
+//};
 
 function calculateAlternativeRoute(directionsService) {
 	console.log("Origin Coordinates being used in calculating route are : " + originCoordinates);
