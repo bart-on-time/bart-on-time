@@ -21,10 +21,10 @@ var database = firebase.database();
 /////////////////////////////////
 
 //// vars ////
+var authSplash = $("#authSplash");
 var phase1 = $("#phase1");
 var phase2 = $("#phase2");
 var phase3a = $("#phase3a");
-var phase3b = $("#phase3b");
 
 var tripName;
 var destination;
@@ -52,14 +52,22 @@ var newEtdArray;
 var trainHeadStn;
 var eta;
 var militaryETA;
+var leaveTime;
+var startTrip;
 
+//**Todo: experimenting with oauth-- delete this if can't get working!
+//Global ID of currently signed-in user, needed for authentication.
+var currentUID;
+//**Todo: end of bit to delete if oauth experiment fails.
 
 //// phase controller ////
 function showSection(section) {
+
+	// Remember to remove this if oauth doesn't work.
+	authSplash.css({'display': 'none'});
 	phase1.css({'display': 'none'});
 	phase2.css({'display': 'none'});
 	phase3a.css({'display': 'none'});
-	phase3b.css({'display': 'none'});
 
 	if (section) {
 		section.css({'display' : 'block'});
@@ -70,13 +78,52 @@ function showSection(section) {
 //// phase 1: landing page list of trips ////
 // will be loaded on page load 
 $(document).ready(function() {
-	showSection(phase1);
+	
+	//**Todo: experimenting with oauth; delete everything from here till end,
+	// Assuming I can't get it to work!
+	  //Triggers every time user signs in or signs out.
+	showSection(authSplash);
+
+	firebase.auth().onAuthStateChanged(function(auth) {
+		var auth = firebase.auth().currentUser;
+
+	    //User authenticated and active session begins.
+	    if (auth != null) {
+	    	console.log('User authenticated: ' + auth);
+	    	writeUserData(auth.uid, auth.displayName, auth.email, auth.imageURL);
+	    //User isn't authenticated.
+	    } else {
+	    	console.log('User not authenticated.');
+	    }
+	});
+
+	// Need to properly bring in styling for google button.
+	$("#sign-in-with-google-button").on("click", function() {
+	  	var provider = new firebase.auth.GoogleAuthProvider();
+	  	firebase.auth().signInWithPopup(provider);
+	  	console.log('User signed into Google.');
+	  	showSection(phase1);
+	});
+
+	//Writes authenticated user's data to database.
+	function writeUserData(userId, name, email, imageUrl) {
+		firebase.database().ref('users/' + userId).set({
+	    	username: name,
+	    	email: email
+		});
+	}
+
+	//** End of Oauth experiment
+
 	nextTrainAjax(orig, dest);
 	getUserLocation();
 	// Loop through the array of ETD objects
     //(which is already sorted by earliest time) and cross match with the Train array (newTrainHeadStnArray),
     // and print out its associated ETA
     getNextArrivalTimeEstimate();
+
+    //startYourTripEstimate();
+
 	// Listens for trip click event.
 	//addTripClickListener();
 });
@@ -104,6 +151,8 @@ function addTripClickListener() {
 			//(which is already sorted by earliest time) and cross match with the Train array (newTrainHeadStnArray),
 			// and print out its associated ETA
 			getNextArrivalTimeEstimate();
+
+			//startYourTripEstimate();
 		});
 
 		// needed for edit ubtton //
@@ -111,7 +160,7 @@ function addTripClickListener() {
 
 		initMap();
 
-
+		startYourTripEstimate();
 
     });
 };
@@ -215,6 +264,8 @@ function addSaveTripClickListener() {
         getNextArrivalTimeEstimate();
 
         initMap();
+
+        startYourTripEstimate();
 	});
 }
 
@@ -381,16 +432,29 @@ function calculateRoute(directionsService) {
 			if (travelMode === "WALKING") {
 				$(".walking-distance").html(route.legs[0].distance.text + "/ ");
 				$(".walking-estimate").html(route.legs[0].duration.text);
+				$("#travel-mode").text("WALKING");
 			} else if (travelMode === "DRIVING") {
 				$(".driving-distance").html(route.legs[0].distance.text + "/ ");
 				$(".driving-estimate").html(route.legs[0].duration.text);
+				$("#travel-mode").text("DRIVING");
 			}
-			
   		} else {
     		window.alert('Directions request failed due to ' + status);
   		}
 	});
 }
+
+function startYourTripEstimate() {
+	console.log("I'm at least in leave time function but no value yet.");
+	if (travelMode === "DRIVING") {
+		leaveTime = $("#driving-estimate").val() - eta;
+		console.log("Leave time working for driving: " + leaveTime);
+	} else {
+		leaveTime = $("#walking-estimate").val() - eta;
+		console.log("Leave time working for walking: " + leaveTime);
+	}
+	$("#leave-time-min").text(leaveTime + " minutes");
+};
 
 function calculateAlternativeRoute(directionsService) {
 	console.log("Origin Coordinates being used in calculating route are : " + originCoordinates);

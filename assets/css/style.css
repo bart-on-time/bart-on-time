@@ -2,13 +2,72 @@
 * {
   box-sizing: border-box;
 }
-
-.clickable-row:hover {
-	background-color: red;
+.header-container{
+	width: 100%;
 }
 
-.btn {
-	background-color: green;
+header{
+	background: #428bca;
+	text-align: center;
+	font-size: xx-large;
+	color: white;
+	margin-top: 3%;
+	margin-right: 29%;
+}
+
+.col-lg-12{
+	margin-top: 3%;
+}
+
+.view-trip {
+    font-size: large;
+    font-weight: bold;
+}
+
+span {
+	font-size: medium;
+	font-weight: normal;
+	background-color: #eee;
+}
+
+body {
+	background-color: gray;
+	padding: 1%;
+}
+
+button#sign-in-with-google-button {
+    margin: 10%;
+    font-size: large;
+}
+
+label {
+	margin-bottom: 2%;
+	margin-top: 1%;
+}
+
+.btn-primary {
+	font-size: large;
+	margin: 2%;
+}
+
+.btn-danger {
+	font-size: large;
+	margin-top: 0%;
+}
+
+.travel {
+	margin-top: 4%;
+}
+
+.trip-id {
+	display: none;
+}
+
+.checkbox-inline+.checkbox-inline, .radio-inline+.radio-inline {
+    margin-top: 1%;
+    margin-left: 1%;
+    margin-right: 1%;
+    font-size: large;
 }
 
 /* 
