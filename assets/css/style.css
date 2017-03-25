@@ -1,4 +1,10 @@
 /* So padding and border no longer increase width. */
+body { 
+  background: url(../images/background.jpg) no-repeat center center fixed; 
+  background-size: cover;
+  font-weight: bolder;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -36,7 +42,7 @@ span {
 }
 
 body {
-	background-color: gray;
+	/*background-color: gray;*/
 	padding: 1%;
 }
 
