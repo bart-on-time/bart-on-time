@@ -122,8 +122,6 @@ $(document).ready(function() {
     // and print out its associated ETA
     getNextArrivalTimeEstimate();
 
-    //startYourTripEstimate();
-
 	// Listens for trip click event.
 	//addTripClickListener();
 });
@@ -152,15 +150,12 @@ function addTripClickListener() {
 			// and print out its associated ETA
 			getNextArrivalTimeEstimate();
 
-			//startYourTripEstimate();
 		});
 
 		// needed for edit ubtton //
 		tripClickEdit = true;
 
 		initMap();
-
-		startYourTripEstimate();
 
     });
 };
@@ -265,7 +260,6 @@ function addSaveTripClickListener() {
 
         initMap();
 
-        //startYourTripEstimate();
 	});
 }
 
@@ -433,13 +427,13 @@ function calculateRoute(directionsService) {
 				$(".walking-distance").html(route.legs[0].distance.text + "/ ");
 				var walkingEstimate = $(".walking-estimate");
 				walkingEstimate.html(route.legs[0].duration.text);
-				leaveTime = parseFloat(walkingEstimate.text()) - parseFloat(eta);
+				leaveTime = parseFloat(eta) - parseFloat(walkingEstimate.text());
 				$("#travel-mode").text("WALKING");
 			} else if (travelMode === "DRIVING") {
 				$(".driving-distance").html(route.legs[0].distance.text + "/ ");
 				var drivingEstimate = $(".driving-estimate");
 				drivingEstimate.html(route.legs[0].duration.text);
-				leaveTime = parseFloat(drivingEstimate.text()) - parseFloat(eta);
+				leaveTime = parseFloat(eta) - parseFloat(drivingEstimate.text());
 				$("#leave-time-min").text(leaveTime + " minutes");
 				$("#travel-mode").text("DRIVING");
 			}
@@ -702,5 +696,4 @@ function determineNextArrivalTrain(militaryETA, nextEta) {
 
   return nextArrival;
 }
-
 
