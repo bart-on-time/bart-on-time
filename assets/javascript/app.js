@@ -8,13 +8,13 @@
  	messagingSenderId: "258285045447"
  };
 
-//var config = {
-	//apiKey: "AIzaSyBS6nowOI7CgfhnS-hM3A5BUxh58k7NdVo",
-    //authDomain: "test-d1af2.firebaseapp.com",
-    //databaseURL: "https://test-d1af2.firebaseio.com",
-    //storageBucket: "test-d1af2.appspot.com",
-    //messagingSenderId: "395340255814"
-//};
+// var config = {
+// 	apiKey: "AIzaSyBS6nowOI7CgfhnS-hM3A5BUxh58k7NdVo",
+//     authDomain: "test-d1af2.firebaseapp.com",
+//     databaseURL: "https://test-d1af2.firebaseio.com",
+//     storageBucket: "test-d1af2.appspot.com",
+//     messagingSenderId: "395340255814"
+// };
 
 firebase.initializeApp(config);
 var database = firebase.database();
@@ -33,8 +33,11 @@ var travelMode;
 var userOrigin;
 var alternativeTravelMode;
 // when user clicks edit
+var tripId;
 var editUniqueId;
 var editStauts = false;
+var saveEdit = false;
+var tripClickEdit = false;
 /////////////////////////////////
 
 // Declare global variables
@@ -81,7 +84,7 @@ $(document).ready(function() {
 // Fires when trip selected.
 function addTripClickListener() {
 	$("#trips").on("click", "tr", function() {
-		var tripId = $(this).children('.trip-id').text();
+		tripId = $(this).children('.trip-id').text();
 		console.log("You clicked on this trip: " + tripId);
 
 		showSection(phase3a);
@@ -103,7 +106,13 @@ function addTripClickListener() {
 			getNextArrivalTimeEstimate();
 		});
 
+		// needed for edit ubtton //
+		tripClickEdit = true;
+
 		initMap();
+
+
+
     });
 };
 
@@ -176,6 +185,7 @@ function addSaveTripClickListener() {
 			);
 			// needed for edit ubtton //
 			editStauts = false;
+			saveEdit = true;
 		}
 		else { // new record
 			//TODO: Add to firebase the orig and dest codes for Bart API.
@@ -248,6 +258,8 @@ $("#cancel").on("click", function() {
 	// clear input fields
 	// navigate back to trip view
 	$("input:text").val(""); // this clears the input box after clicking enter
+	$("#tripName-input").attr("placeholder", "");
+
 	showSection(phase1);
 });
 
@@ -262,6 +274,21 @@ $("#cancel").on("click", function() {
 		// or delete prior verion and create new unique trip //  not preferred
 $(".edit").on("click", function() {
 	editStauts = true;
+
+	if (tripClickEdit) {
+		database.ref("" + tripId + "").on("value", function(snapshot) {
+			$("#tripName-input").attr("placeholder", snapshot.val().tripName);
+		});
+	}
+	else if (saveEdit) {
+		database.ref("" + editUniqueId + "").on("value", function(snapshot) {
+			$("#tripName-input").attr("placeholder", snapshot.val().tripName);
+		});	
+	}
+
+	tripClickEdit = false;
+	saveEdit = false;
+
 	showSection(phase2);
 	//addSaveTripClickListener();
 });
