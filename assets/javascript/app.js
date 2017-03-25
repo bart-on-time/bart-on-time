@@ -1,20 +1,20 @@
 
 // Initialize Firebase
- // var config = {
- // 	apiKey: "AIzaSyCNU5CN43KJZiTfFgMCIpWPMLBIiVUQ8Fo",
- // 	authDomain: "bart-on-time.firebaseapp.com",
- // 	databaseURL: "https://bart-on-time.firebaseio.com",
- // 	storageBucket: "bart-on-time.appspot.com",
- // 	messagingSenderId: "258285045447"
- // };
+ var config = {
+ 	apiKey: "AIzaSyCNU5CN43KJZiTfFgMCIpWPMLBIiVUQ8Fo",
+ 	authDomain: "bart-on-time.firebaseapp.com",
+ 	databaseURL: "https://bart-on-time.firebaseio.com",
+ 	storageBucket: "bart-on-time.appspot.com",
+ 	messagingSenderId: "258285045447"
+ };
 
-var config = {
-	apiKey: "AIzaSyBS6nowOI7CgfhnS-hM3A5BUxh58k7NdVo",
-    authDomain: "test-d1af2.firebaseapp.com",
-    databaseURL: "https://test-d1af2.firebaseio.com",
-    storageBucket: "test-d1af2.appspot.com",
-    messagingSenderId: "395340255814"
-};
+// var config = {
+// 	apiKey: "AIzaSyBS6nowOI7CgfhnS-hM3A5BUxh58k7NdVo",
+//     authDomain: "test-d1af2.firebaseapp.com",
+//     databaseURL: "https://test-d1af2.firebaseio.com",
+//     storageBucket: "test-d1af2.appspot.com",
+//     messagingSenderId: "395340255814"
+// };
 
 firebase.initializeApp(config);
 var database = firebase.database();
